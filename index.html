@@ -291,6 +291,7 @@
     <symbol id="i-lock" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></symbol>
     <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></symbol>
+    <symbol id="i-offline" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-1.48 0-2.85.43-4.01 1.17l1.46 1.46C10.21 6.23 11.08 6 12 6c3.04 0 5.5 2.46 5.5 5.5v.5H19c1.66 0 3 1.34 3 3 0 1.13-.64 2.11-1.56 2.62l1.45 1.45C23.16 18.16 24 16.68 24 15c0-2.64-2.05-4.78-4.65-4.96zM3 5.27l2.75 2.74C2.56 8.15 0 10.77 0 14c0 3.31 2.69 6 6 6h11.73l2 2L21 20.73 4.27 4 3 5.27zM7.73 10l8 8H6c-2.21 0-4-1.79-4-4s1.79-4 4-4h1.73z"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></symbol>
     <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></symbol>
     <symbol id="i-mask" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/></symbol>
@@ -400,6 +401,7 @@
         <div class="g4" onclick="ouvrirCarnet()"><span class="ic"><svg class="ic-svg lg"><use href="#i-book"/></svg></span><span class="lb">Carnet</span></div>
         <div class="g4" onclick="ouvrirVW()"><span class="ic"><svg class="ic-svg lg"><use href="#i-wallet"/></svg></span><span class="lb">Portefeuille $</span></div>
       </div>
+      <button class="btn btn-ghost" style="margin-top:10px;border-color:var(--gold);color:var(--gold2);" onclick="mettreEnOffline()"><svg class="ic"><use href="#i-offline"/></svg> Mettre mon argent hors-ligne</button>
     </div>
     <div class="card">
       <div class="card-h"><span class="card-t">Activité récente</span></div>
@@ -757,6 +759,7 @@
       <div class="menu-list">
         <div class="menu-item" onclick="navP2P()"><span class="ic"><svg class="ic-svg"><use href="#i-send"/></svg></span><div><b>P2P simple</b><small>Envoi direct UQ ↔ UQ</small></div><span class="chev">›</span></div>
         <div class="menu-item" onclick="menuSync()"><span class="ic"><svg class="ic-svg"><use href="#i-send"/></svg></span><div><b>Synchroniser</b><small>Envoyer la file hors-ligne</small></div><span class="chev" id="menu-q-count">0</span></div>
+        <div class="menu-item" onclick="mettreEnOffline()"><span class="ic"><svg class="ic-svg"><use href="#i-offline"/></svg></span><div><b>Mettre mon argent hors-ligne</b><small>Transférer vers le wallet offline</small></div><span class="chev">›</span></div>
         <div class="menu-item" onclick="ouvrirHorsLigne()"><span class="ic"><svg class="ic-svg"><use href="#i-key"/></svg></span><div><b>Wallet hors-ligne</b><small>Phrase 24 mots sans serveur</small></div><span class="chev">›</span></div>
         <div class="menu-item" onclick="ouvrirVW()"><span class="ic"><svg class="ic-svg"><use href="#i-wallet"/></svg></span><div><b>Portefeuille virtuel</b><small>USD / CDF local</small></div><span class="chev">›</span></div>
         <div class="menu-item" onclick="ouvrirSwap()"><span class="ic"><svg class="ic-svg"><use href="#i-swap"/></svg></span><div><b>Convertir</b><small>BORB ↔ USD ↔ CDF</small></div><span class="chev">›</span></div>
@@ -1043,7 +1046,11 @@ window.creerCompte=async function(){
 
 // ---------- HORS-LIGNE ----------
 let OFFLINE=null;
-window.ouvrirHorsLigne=function(){fermerSheets();$('sheet-offline').classList.remove('hidden');};
+window.ouvrirHorsLigne=function(){
+  fermerSheets();$('sheet-offline').classList.remove('hidden');
+  const off=localStorage.getItem('borb_offline_uq_'+SESSION.uq);
+  if(off)$('offline-out').innerHTML='<div class="okm">Wallet offline enregistré : <b>'+off+'</b> — utilisez « Mettre mon argent hors-ligne » pour y transférer des BORB.</div>';
+};
 window.genOffline=async function(){
   try{
     const phrase=await genererPhrase();const{vk}=await cleDepuisPhrase(phrase);
@@ -1059,9 +1066,35 @@ window.registerOffline=async function(){
   try{
     const r=await api('POST','/compte/ouvrir',{uq,cle_publique:OFFLINE.vk,solde_femto:'0'});
     if(r.status!=='compte_ouvert')throw new Error(r.message||'Rattachement refusé');
-    $('offline-out').innerHTML+='<div class="okm">✅ Wallet rattaché à '+uq+'.</div>';
+    localStorage.setItem('borb_offline_uq_'+SESSION.uq,uq);
+    $('offline-out').innerHTML+='<div class="okm">✅ Wallet offline rattaché à <b>'+uq+'</b> — enregistré. Utilisez « Mettre mon argent hors-ligne » pour y envoyer des BORB.</div>';
     $('offline-register').classList.add('hidden');
   }catch(e){$('offline-out').innerHTML+=`<div class="err">${e.message}</div>`;}
+};
+
+// ---------- METTRE L'ARGENT EN OFFLINE ----------
+// Transfère des BORB du compte courant vers le wallet offline rattaché.
+window.mettreEnOffline=async function(){
+  const off=localStorage.getItem('borb_offline_uq_'+SESSION.uq);
+  if(!off){toast('Aucun wallet offline — créez-en un (menu → Wallet hors-ligne)');ouvrirHorsLigne();return;}
+  const raw=prompt('Montant en BORB à mettre hors-ligne (vers '+off+') :','');
+  if(raw===null)return;
+  const borb=parseFloat(raw.replace(',','.'));
+  if(!borb||borb<=0)return toast('Montant invalide');
+  const borbStr=borb.toFixed(8).replace(/0+$/,'').replace(/\.$/,'');
+  const femto=borbToFemto(borbStr);
+  if(!femto)return toast('Montant trop petit');
+  toast('Transfert vers wallet offline…');
+  try{
+    const id=await envoyerUne({to:off,borb:borbStr,femto,fee:'0'});
+    toast('✅ '+borbStr+' BORB mis hors-ligne — tx '+id.slice(0,16)+'…');
+    await refreshSolde();
+  }catch(e){
+    if(estErreurReseau(e)){
+      const q=qLoad();q.push({to:off,borb:borbStr,femto,fee:'0',dev:'BORB',montant:borb,at:Date.now()});qSave(q);
+      toast('📴 Hors-ligne : transfert mis en file — sync à la reconnexion');
+    }else toast('Erreur : '+(e.message||'refus'));
+  }
 };
 
 // ---------- DASHBOARD ----------
