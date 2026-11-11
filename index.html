@@ -141,6 +141,10 @@
   @keyframes splashSlide { 0%{transform:translateX(-100%);} 100%{transform:translateX(400%);} }
   .splash-sub { font-size:11px;color:var(--mut);letter-spacing:1px; }
 
+  /* ===== TOAST ===== */
+  #toast { position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid var(--gold);color:var(--txt);padding:11px 18px;border-radius:14px;font-size:12px;font-weight:600;opacity:0;pointer-events:none;transition:all .3s;z-index:150;max-width:86vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.5); }
+  #toast.on { opacity:1;transform:translateX(-50%) translateY(0); }
+
   label { display:block;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--mut);margin:14px 0 6px; }
   input,textarea,select { width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:14px;color:var(--txt);padding:13px 14px;font-size:15px;outline:none;transition:border .2s; }
   html.light input,html.light textarea,html.light select { color:#1a2340; }
@@ -759,6 +763,7 @@
       <h2>Menu</h2>
       <div class="menu-list">
         <div class="menu-item" onclick="navP2P()"><span class="ic"><svg class="ic-svg"><use href="#i-send"/></svg></span><div><b>P2P simple</b><small>Envoi direct UQ ↔ UQ</small></div><span class="chev">›</span></div>
+        <div class="menu-item" onclick="menuSync()"><span class="ic"><svg class="ic-svg"><use href="#i-send"/></svg></span><div><b>Synchroniser</b><small>Envoyer la file hors-ligne</small></div><span class="chev" id="menu-q-count">0</span></div>
         <div class="menu-item" onclick="ouvrirHorsLigne()"><span class="ic"><svg class="ic-svg"><use href="#i-key"/></svg></span><div><b>Wallet hors-ligne</b><small>Phrase 24 mots sans serveur</small></div><span class="chev">›</span></div>
         <div class="menu-item" onclick="ouvrirVW()"><span class="ic"><svg class="ic-svg"><use href="#i-wallet"/></svg></span><div><b>Portefeuille virtuel</b><small>USD / CDF local</small></div><span class="chev">›</span></div>
         <div class="menu-item" onclick="ouvrirSwap()"><span class="ic"><svg class="ic-svg"><use href="#i-swap"/></svg></span><div><b>Convertir</b><small>BORB ↔ USD ↔ CDF</small></div><span class="chev">›</span></div>
@@ -943,8 +948,11 @@ window.connecter=async function(){
     if(!st)localStorage.setItem('borb_pin_'+uq,pinHash);
     SESSION={uq,phrase,kp,vk,pinHash,loginAt:new Date().toISOString()};
     montrerDash();
-  }catch(e){err('auth-err',e.message||'Erreur réseau');}
-  finally{$('btn-login').textContent='Se connecter';}
+  }catch(e){
+    const msg=e.message||'Erreur réseau';
+    err('auth-err','Échec à l\'étape : '+msg+' — vérifiez votre connexion au nœud.');
+  }
+  finally{$('btn-login').innerHTML='<svg class="ic"><use href="#i-lock"/></svg> Se connecter';}
 };
 window.creerCompte=async function(){
   err('auth-err');okm('auth-ok');
@@ -1007,6 +1015,8 @@ async function montrerDash(){
   $('sb-time').textContent=new Date(SESSION.loginAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
   geoInfo();
   await refreshSolde();
+  // File hors-ligne : on tente la sync en silence au retour du réseau
+  if(qCount()>0){try{await syncOffline();}catch(e){}}
 }
 async function refreshSolde(){
   try{
@@ -1097,14 +1107,26 @@ window.envoyerBorb=async function(){
     okm('send-ok','✅ Envoyé ! '+fmtDev(brut,SEND_DEV)+' ≈ '+borb.toLocaleString('fr-FR',{maximumFractionDigits:4})+' BORB — tx '+prep.tx.borb_id.slice(0,20)+'…');
     $('send-to').value='';$('send-amount').value='';$('send-fee').value='';
     await refreshSolde();
-  }catch(e){err('send-err',e.message||'Erreur');}
-  finally{$('btn-send').textContent='Envoyer';}
+  }catch(e){
+    // Réseau coupé ? → file hors-ligne (signature à la sync)
+    if(estErreurReseau(e)){
+      const brut=parseFloat(raw.replace(',','.'))||0;
+      const borb=montantVersBorb(brut,SEND_DEV);
+      const borbStr=borb.toFixed(8).replace(/0+$/,'').replace(/\.$/,'');
+      const femto=borbToFemto(borbStr);
+      if(femto){const q=qLoad();q.push({to,borb:borbStr,femto,fee:borbToFemto(fee)||'0',dev:SEND_DEV,montant:brut,at:Date.now()});qSave(q);}
+      okm('send-ok','📴 Hors-ligne : envoi mis en file ('+to+') — synchronisé à la reconnexion');
+      $('send-to').value='';$('send-amount').value='';$('send-fee').value='';
+    }else err('send-err',e.message||'Erreur');
+  }
+  finally{$('btn-send').innerHTML='<svg class="ic"><use href="#i-send"/></svg> Envoyer';}
 };
 function borbToFemto(s){s=s.trim();if(!/^\d+(\.\d{1,15})?$/.test(s))return null;const[i,d='']=s.split('.');const f=(d+'0'.repeat(15)).slice(0,15);return(BigInt(i)*10n**15n+BigInt(f)).toString();}
 if($('send-amount'))$('send-amount').addEventListener('input',sendCalc);
 
 // ---------- MENU ----------
-window.ouvrirMenu=function(){fermerSheets();$('sheet-menu').classList.remove('hidden');};
+window.ouvrirMenu=function(){fermerSheets();const qc=$('menu-q-count');if(qc)qc.textContent=qCount();$('sheet-menu').classList.remove('hidden');};
+window.menuSync=function(){fermerSheets();syncOffline();};
 window.navP2P=function(){fermerSheets();navGo('p2p');};
 
 // ---------- P2P SIMPLE ----------
@@ -1149,11 +1171,57 @@ window.p2pSend=async function(){
     okm('p2p-ok','✅ Envoyé ! '+fmtDev(brut,P2P_DEV)+' ≈ '+borb.toLocaleString('fr-FR',{maximumFractionDigits:4})+' BORB — tx '+prep.tx.borb_id.slice(0,16)+'…');
     $('p2p-to').value='';$('p2p-amount').value='';p2pCalc();
     await refreshSolde();
-  }catch(e){err('p2p-err',e.message||'Erreur');}
+  }catch(e){
+    if(estErreurReseau(e)){
+      const brut=parseFloat(raw.replace(',','.'))||0;
+      const borb=montantVersBorb(brut,P2P_DEV);
+      const borbStr=borb.toFixed(8).replace(/0+$/,'').replace(/\.$/,'');
+      const femto=borbToFemto(borbStr);
+      if(femto){const q=qLoad();q.push({to,borb:borbStr,femto,femtoStr:femto,fee:'0',dev:P2P_DEV,montant:brut,at:Date.now()});qSave(q);}
+      okm('p2p-ok','📴 Hors-ligne : envoi mis en file ('+to+') — synchronisé à la reconnexion');
+      $('p2p-to').value='';$('p2p-amount').value='';p2pCalc();
+    }else err('p2p-err',e.message||'Erreur');
+  }
   finally{$('btn-p2p').innerHTML='<svg class="ic"><use href="#i-send"/></svg> Envoyer';}
 };
 let SCAN_TARGET='send-to';
 window.ouvrirScanP2P=function(){SCAN_TARGET='p2p-to';ouvrirScan();};
+
+// ---------- FILE HORS-LIGNE (envois différés) ----------
+// Mode hotspot / sans nœud : l'envoi est signé plus tard, à la sync.
+const Q_KEY=()=>'borb_queue_'+(SESSION?SESSION.uq:'anon');
+function qLoad(){try{return JSON.parse(localStorage.getItem(Q_KEY())||'[]');}catch(e){return[];}}
+function qSave(q){localStorage.setItem(Q_KEY(),JSON.stringify(q));}
+function qCount(){return qLoad().length;}
+function estErreurReseau(e){const m=(e&&e.message)||'';return e instanceof TypeError||/fetch|network|abort|refused|timeout/i.test(m);}
+async function envoyerUne(it){
+  const prep=await api('POST','/tx/preparer',{from:SESSION.uq,to:it.to,montant_femto:it.femto,frais_femto:it.fee||'0'});
+  if(!prep.tx)throw new Error(prep.message||'Préparation refusée');
+  const sig=nacl.sign.detached(enc.encode(prep.message),SESSION.kp.secretKey);
+  prep.tx.signature=hex(sig);
+  const r=await api('POST','/tx/import',prep.tx);
+  if(r.status!=='appliquee')throw new Error(r.message||'Transaction refusée');
+  return prep.tx.borb_id;
+}
+window.syncOffline=async function(){
+  const q=qLoad();
+  if(!q.length){toast('File hors-ligne vide');return;}
+  toast('Synchronisation…');
+  let done=0;
+  for(const it of q){
+    try{ await envoyerUne(it); done++; }
+    catch(e){ if(estErreurReseau(e))break; /* refus nœud : on garde en file */ }
+  }
+  qSave(q.slice(done));
+  await refreshSolde();
+  toast(done?qCount()?done+' envoyé(s), '+qCount()+' restant(s)':done+' envoyé(s) — file vide':'Aucun envoi synchronisé');
+};
+function toast(msg){
+  let t=$('toast');
+  if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('on');
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),3200);
+}
 
 // ---------- RECEVOIR / QR ----------
 window.ouvrirRecevoir=function(){
