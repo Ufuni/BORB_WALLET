@@ -898,7 +898,11 @@ window.seedCount=function(){const n=($('in-seed').value.trim().split(/\s+/).filt
 let _uqAttente='',_pinAttente='';
 window.deverrouiller=async function(){
   err('lock-err');
-  const uq=$('lock-uq').value.trim(),pin=$('lock-pin').value.trim();
+  let uq=$('lock-uq').value.trim().toUpperCase().replace(/[^A-Z0-9-]/g,'');
+  // Accepte "00000001", "uq-00000001", "UQ00000001" → "UQ-00000001"
+  if(/^\d+$/.test(uq))uq='UQ-'+uq.padStart(8,'0');
+  else if(/^UQ(\d+)$/.test(uq))uq='UQ-'+uq.slice(2).padStart(8,'0');
+  const pin=$('lock-pin').value.trim();
   if(!uq||!/^\d{4,6}$/.test(pin))return err('lock-err','UQ et PIN 4-6 chiffres requis');
   try{
     const h=await empreintePin(pin);const st=localStorage.getItem('borb_pin_'+uq);
