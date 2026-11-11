@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="wallet-icon.svg" type="image/svg+xml">
+<title>UQ BORB Wallet</title>
+<style>
+  :root {
+    --bg:#0b1220; --bg2:#0d1526; --card:#131c33; --card2:#182542;
+    --line:#22304f; --gold:#f0b429; --gold2:#ffd970;
+    --red:#e63946; --blue:#2e86de; --pink:#b5378c; --green:#2ecc71; --red2:#e74c3c;
+    --txt:#f3f6fb; --mut:#8a94b0;
+    --grad:linear-gradient(135deg,#182542 0%,#131c33 100%);
+    --navbg:rgba(13,21,38,.94);
+  }
+  html.light {
+    --bg:#f3f6fb; --bg2:#ffffff; --card:#ffffff; --card2:#eef2f8;
+    --line:#d4dcea; --txt:#1a2340; --mut:#5a6residual880; --mut:#64748b;
+    --navbg:rgba(255,255,255,.94); --grad:linear-gradient(135deg,#ffffff 0%,#eef2f8 100%);
+  }
+  html.hc {
+    --bg:#000; --bg2:#000; --card:#111; --card2:#111;
+    --line:#fff; --txt:#fff; --mut:#ccc; --navbg:#000;
+    --grad:linear-gradient(135deg,#111 0%,#000 100%);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; }
+  body {
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:var(--bg); color:var(--txt); min-height:100dvh;
+    background-image:radial-gradient(ellipse 80% 50% at 50% -10%, rgba(46,134,222,.16), transparent),
+                     radial-gradient(ellipse 60% 40% at 90% 110%, rgba(240,180,41,.07), transparent);
+    transition:background .3s, color .3s;
+  }
+  .app { max-width:430px; margin:0 auto; min-height:100dvh; display:flex; flex-direction:column; padding:0 16px 96px; }
+
+  /* ===== HEADER ===== */
+  .hdr { display:flex; align-items:center; justify-content:space-between; padding:18px 4px 6px; }
+  .brand { display:flex; align-items:center; gap:10px; }
+  .brand .orb { width:40px;height:40px;border-radius:12px;background:radial-gradient(circle at 35% 30%,var(--gold2),var(--gold) 60%,#b97f0e);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#1a1200;box-shadow:0 4px 18px rgba(240,180,41,.35); }
+  .brand h1 { font-size:17px; letter-spacing:1.5px; }
+  .brand h1 span { color:var(--gold); }
+  .brand small { display:block; font-size:10px; color:var(--mut); letter-spacing:1px; }
+  .hdr .tools { display:flex; gap:8px; }
+  .tbtn { width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--mut);cursor:pointer;display:flex;align-items:center;justify-content:center; }
+  .tbtn.on { color:var(--gold); border-color:var(--gold); }
+  .net { display:flex;align-items:center;gap:6px;font-size:11px;color:var(--green);background:rgba(46,204,113,.1);padding:5px 11px;border-radius:20px; }
+  .net::before { content:'';width:7px;height:7px;border-radius:50%;background:var(--green);animation:pl 1.6s infinite; }
+  @keyframes pl { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  /* ===== CARTES ===== */
+  .card { background:var(--grad);border:1px solid var(--line);border-radius:20px;padding:20px;margin-top:14px;box-shadow:0 10px 34px rgba(0,0,0,.35); }
+  .card-h { display:flex;justify-content:space-between;align-items:center;margin-bottom:6px; }
+  .card-t { font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--mut); }
+  .ic-svg { width:18px;height:18px;fill:currentColor;vertical-align:-3px; }
+  .ic-svg.lg { width:24px;height:24px; }
+
+  /* ===== SOLDE ===== */
+  .bal { text-align:center;padding:10px 0 4px; }
+  .bal .v { font-size:42px;font-weight:800;letter-spacing:-1px; }
+  .bal .v small { font-size:20px;color:var(--mut);font-weight:600; }
+  .bal .u { color:var(--gold);font-size:15px;font-weight:600;margin-top:2px; }
+  .bal .rate { font-size:11px;color:var(--mut);margin-top:8px; }
+
+  /* ===== ACTIONS ===== */
+  .grid4 { display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px; }
+  .g4 { background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 6px;text-align:center;cursor:pointer;transition:transform .1s,border-color .2s; }
+  .g4:active { transform:scale(.96);border-color:var(--gold); }
+  .g4 .ic { display:block;margin-bottom:6px;color:var(--gold); }
+  .g4 .lb { font-size:11px;color:var(--mut);font-weight:600;display:block; }
+  .grid4 .g4:nth-child(2) .ic { color:var(--blue); }
+  .grid4 .g4:nth-child(3) .ic { color:var(--pink); }
+  .grid4 .g4:nth-child(4) .ic { color:var(--green); }
+
+  /* ===== BOTTOM NAV ===== */
+  .bnav { position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;display:flex;background:var(--navbg);backdrop-filter:blur(14px);border-top:1px solid var(--line);z-index:40;padding:8px 8px calc(8px + env(safe-area-inset-bottom)); }
+  .bnav button { flex:1;background:none;border:none;color:var(--mut);font-size:10px;font-weight:600;padding:8px 0 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px; }
+  .bnav button .ic { width:20px;height:20px;fill:currentColor; }
+  .bnav button.on { color:var(--gold); }
+  .fab { width:56px;height:56px;border-radius:50%;margin-top:-26px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a1200;border:4px solid var(--bg);font-size:24px;cursor:pointer;box-shadow:0 8px 24px rgba(240,180,41,.4);display:flex;align-items:center;justify-content:center; }
+
+  /* ===== STATUS BAR (bas) ===== */
+  .statusbar { position:fixed;bottom:calc(64px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:100%;max-width:430px;display:flex;gap:14px;justify-content:center;font-size:10px;color:var(--mut);padding:4px 0;z-index:39;pointer-events:none; }
+  .statusbar span { display:flex;align-items:center;gap:4px; }
+  .statusbar .ic { width:11px;height:11px;fill:currentColor; }
+
+  /* ===== PAGES ===== */
+  .page { display:none; }
+  .page.on { display:block; }
+
+  /* ===== AUTH ===== */
+  .hero { text-align:center;padding:26px 0 10px; }
+  .hero .big-orb { width:84px;height:84px;margin:0 auto 14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--gold2),var(--gold) 55%,#b97f0e);box-shadow:0 0 50px rgba(240,180,41,.5),inset 0 -8px 18px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:34px; }
+  .hero h2 { font-size:24px;letter-spacing:2px; }
+  .hero h2 span { color:var(--gold); }
+  .hero p { color:var(--mut);font-size:13px;margin-top:6px; }
+  .uqline { display:flex;align-items:center;justify-content:center;gap:10px;margin-top:14px;font-size:11px;color:var(--mut); }
+  .uqline .d { width:26px;height:3px;border-radius:2px; }
+  .uqline .d:nth-child(2){ background:var(--blue); } .uqline .d:nth-child(4){ background:var(--red); } .uqline .d:nth-child(6){ background:var(--pink); }
+  .uqline b { color:var(--blue);font-size:13px;letter-spacing:2px; }
+
+  label { display:block;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--mut);margin:14px 0 6px; }
+  input,textarea,select { width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:14px;color:var(--txt);padding:13px 14px;font-size:15px;outline:none;transition:border .2s; }
+  html.light input,html.light textarea,html.light select { color:#1a2340; }
+  input:focus,textarea:focus,select:focus { border-color:var(--gold); }
+  textarea { resize:vertical;min-height:88px;font-size:13px;line-height:1.6; }
+  .btn { width:100%;margin-top:18px;padding:15px;border:none;border-radius:14px;font-size:15px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:transform .1s,filter .2s;display:flex;align-items:center;justify-content:center;gap:8px; }
+  .btn:active { transform:scale(.98); }
+  .btn .ic { width:18px;height:18px;fill:currentColor; }
+  .btn-gold { background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a1200; }
+  .btn-ghost { background:transparent;border:1px solid var(--line);color:var(--txt);margin-top:10px; }
+  .btn-blue { background:linear-gradient(135deg,var(--blue),#1f5fa8);color:#fff; }
+  .btn-green { background:linear-gradient(135deg,#34e08a,#1fae5c);color:#04160c; }
+  .btn-red { background:linear-gradient(135deg,var(--red),#b02a37);color:#fff; }
+  .row { display:flex;gap:10px; } .row > * { flex:1; }
+  .hidden { display:none !important; }
+  .err { color:var(--red2);font-size:12px;margin-top:10px;text-align:center;min-height:16px; }
+  .okm { color:var(--green);font-size:12px;margin-top:10px;text-align:center; }
+  .spin { display:inline-block;width:15px;height:15px;border:2px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:rot .8s linear infinite;vertical-align:middle; }
+  @keyframes rot { to{transform:rotate(360deg)} }
+  .pseudo-tag { display:inline-flex;align-items:center;gap:6px;background:rgba(240,180,41,.12);color:var(--gold);border:1px solid rgba(240,180,41,.3);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;margin-top:8px; }
+
+  /* ===== VERROU ===== */
+  #lock-screen { position:fixed;inset:0;background:var(--bg);z-index:100;display:flex;align-items:center;justify-content:center;padding:20px; }
+
+  /* ===== SHEETS ===== */
+  .sheet { position:fixed;inset:0;background:rgba(4,6,14,.85);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;z-index:60; }
+  .sheet .inner { background:var(--card2);border:1px solid var(--line);border-radius:24px 24px 0 0;width:100%;max-width:430px;padding:22px 20px calc(20px + env(safe-area-inset-bottom));max-height:92dvh;overflow-y:auto;animation:up .25s ease; }
+  @keyframes up { from{transform:translateY(70px);opacity:0} to{transform:none;opacity:1} }
+  .sheet h2 { font-size:18px; }
+  .sheet .sub { color:var(--mut);font-size:12px;margin:4px 0 10px; }
+  .close-x { float:right;background:none;border:none;color:var(--mut);font-size:22px;cursor:pointer; }
+
+  /* ===== PAGE TRADING P2P ===== */
+  .trade-head { display:flex;align-items:center;gap:12px;margin:8px 0 4px; }
+  .trade-head h2 { font-size:20px;flex:1; }
+  .back-b { width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--txt);cursor:pointer;display:flex;align-items:center;justify-content:center; }
+  .back-b .ic { width:18px;height:18px;fill:currentColor;transform:rotate(180deg); }
+  .market-item { background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:10px; }
+  .market-item .mi-top { display:flex;justify-content:space-between;align-items:center; }
+  .market-item .mi-side { font-size:11px;font-weight:800;padding:3px 10px;border-radius:12px; }
+  .mi-side.buy { background:rgba(46,204,113,.15);color:var(--green); }
+  .mi-side.sell { background:rgba(230,57,70,.15);color:var(--red); }
+  .market-item .mi-amount { font-size:17px;font-weight:800;margin:8px 0 2px; }
+  .market-item .mi-meta { font-size:11px;color:var(--mut); }
+  .market-item .mi-rate { font-size:11px;color:var(--gold);margin-top:4px; }
+  .take-btn { width:100%;margin-top:10px;padding:11px;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer; }
+  .take-btn.buy { background:linear-gradient(135deg,#34e08a,#1fae5c);color:#04160c; }
+  .take-btn.sell { background:linear-gradient(135deg,var(--red),#b02a37);color:#fff; }
+
+  /* ===== QR / SCAN ===== */
+  .qr-box { background:#fff;border-radius:16px;padding:16px;display:flex;justify-content:center;margin:12px 0; }
+  .qr-box canvas,.qr-box img { width:200px;height:200px;image-rendering:pixelated; }
+  .addr-chip { display:flex;align-items:center;gap:8px;background:var(--bg2);border:1px dashed var(--line);border-radius:12px;padding:12px;font-family:monospace;font-size:13px;color:var(--gold2);word-break:break-all; }
+  .addr-chip button { background:none;border:none;color:var(--mut);font-size:12px;cursor:pointer;white-space:nowrap; }
+  #scan-video { width:100%;border-radius:14px;background:#000;margin-top:10px; }
+
+  /* ===== CARNET ===== */
+  .tabs { display:flex;gap:8px;margin:14px 0; }
+  .tab { flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--mut);font-size:12px;font-weight:600;cursor:pointer; }
+  .tab.on { background:var(--blue);border-color:var(--blue);color:#fff; }
+  .tab.on.buy { background:var(--green);border-color:var(--green);color:#04160c; }
+  .tab.on.sell { background:var(--red);border-color:var(--red);color:#fff; }
+  .ordre-card { background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:13px;margin-top:10px;font-size:13px; }
+  .ordre-card .oh { display:flex;justify-content:space-between;align-items:center; }
+  .ordre-card .oid { font-family:monospace;color:var(--gold2);font-size:11px; }
+  .ordre-card .om { font-weight:700;font-size:15px;margin:6px 0; }
+  .ordre-card .om small { color:var(--mut);font-weight:400;font-size:11px; }
+  .ordre-card .ocode { font-family:monospace;font-size:20px;letter-spacing:4px;color:var(--green);text-align:center;background:rgba(46,204,113,.08);border-radius:8px;padding:8px;margin:8px 0; }
+  .ordre-card .ometa { color:var(--mut);font-size:11px;line-height:1.6; }
+  .statut { font-size:10px;padding:3px 8px;border-radius:10px;font-weight:700;text-transform:uppercase; }
+  .statut.en_attente { background:rgba(240,180,41,.15);color:var(--gold); }
+  .statut.pourvu { background:rgba(46,204,113,.15);color:var(--green); }
+  .statut.annule,.statut.expire { background:rgba(231,76,60,.15);color:var(--red); }
+  .mini-btn { background:var(--blue);color:#fff;border:none;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:600;cursor:pointer;margin-top:8px;width:100%; }
+  .mini-btn.red { background:var(--red); }
+  .mini-btn.ghost { background:transparent;border:1px solid var(--line);color:var(--mut); }
+
+  /* ===== CONVERT / VW ===== */
+  .conv-row { display:flex;align-items:center;gap:10px;margin:12px 0; }
+  .conv-box { flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:14px; }
+  .conv-box .cl { font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:1px; }
+  .conv-box .cv { font-size:20px;font-weight:800;margin-top:4px; }
+  .kv { display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px; }
+  .kv:last-child { border:none; }
+  .kv b { color:var(--gold2); }
+  .vw-bal { text-align:center;padding:16px 0; }
+  .vw-bal .v { font-size:36px;font-weight:800;color:var(--green); }
+  .vw-bal .v small { font-size:18px;color:var(--mut);font-weight:600; }
+  .vw-tag { font-size:10px;color:var(--mut);background:var(--bg2);border-radius:8px;padding:4px 10px;display:inline-block;margin-top:6px; }
+
+  /* ===== SWAP / DEVISES ===== */
+  .swap-pair { display:flex;align-items:center;gap:10px;margin:12px 0; }
+  .swap-box { flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:14px; }
+  .swap-box.sel { border-color:var(--blue); }
+  .swap-box .sl { font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:1px; }
+  .swap-box .sv { font-size:22px;font-weight:800;margin-top:4px; }
+  .swap-mid { width:38px;height:38px;border-radius:50%;background:var(--bg2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0; }
+  .dev-chips { display:flex;gap:8px;margin:10px 0;flex-wrap:wrap; }
+  .dev-chip { flex:1;min-width:70px;text-align:center;padding:10px 6px;border-radius:12px;background:var(--bg2);border:1px solid var(--line);font-size:12px;font-weight:700;cursor:pointer;color:var(--mut); }
+  .dev-chip.on { border-color:var(--gold);color:var(--gold2);background:rgba(243,196,78,.08); }
+  .quick-row { display:flex;gap:8px;margin:10px 0; }
+  .quick-chip { flex:1;text-align:center;padding:8px 4px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);font-size:12px;font-weight:700;cursor:pointer;color:var(--mut); }
+  .quick-chip:active { border-color:var(--gold);color:var(--gold2); }
+
+  /* ===== SEED compact ===== */
+  .seed-toggle { width:100%;background:var(--bg2);border:1px dashed var(--line);border-radius:12px;padding:12px;font-size:12px;color:var(--mut);cursor:pointer;text-align:center;margin-top:10px; }
+  .seed-words { display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:14px;max-height:150px;overflow-y:auto; }
+  .seed-words span { font-family:monospace;font-size:11px;color:var(--gold2); }
+  .warn-box { background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.4);border-radius:10px;padding:12px;font-size:12px;color:#f0a8a0;margin-top:12px;line-height:1.5; }
+  .info-box { background:rgba(46,134,222,.1);border:1px solid rgba(46,134,222,.4);border-radius:10px;padding:12px;font-size:12px;color:#a8c8f0;margin-top:12px;line-height:1.5; }
+  .tx-item { display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:12px; }
+  .tx-item:last-child { border:none; }
+  .tx-item .t { color:var(--mut); }
+
+  /* ===== MASQUER ===== */
+  #mask-screen { position:fixed;inset:0;background:#000;z-index:200;display:none;align-items:center;justify-content:center;cursor:pointer; }
+  #mask-screen.on { display:flex; }
+  #mask-screen .m { color:#555;font-size:13px;text-align:center; }
+</style>
+</head>
+<body>
+<!-- ===== SPRITE SVG ===== -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></symbol>
+    <symbol id="i-recv" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10z"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 4h2v2H9V4zm0 4h2v2H9V8zm0 4h2v2H9v-2zm6 8H9v-2h6v2zm0-4H9v-2h6v2zm0-4h-2v-2h2v2zm0-4h-2V8h2v2z"/></symbol>
+    <symbol id="i-conv" viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3z"/></symbol>
+    <symbol id="i-qr" viewBox="0 0 24 24"><path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM3 21h8v-8H3v8zm2-6h4v4H5v-4zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM19 19h2v2h-2zm-6-6h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zM15 15h2v2h-2zm-2 2h2v2h-2zm2 2h2v2h-2zm-2 2h2v2h-2zm-4 0h2v2h-2z"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 4h4V2H2v6h2V4zm0 16H2v-6h2v4h4v2zm16 0v-6h-2v4h-4v2h6zm0-18h-6v2h4v4h2V4zM8 8v8h8V8H8zm2 6H8v-4h2v2h2v2zm6-2h-2v-2H8v2h2v4h4v-4z"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></symbol>
+    <symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></symbol>
+    <symbol id="i-mask" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+
+  <!-- ===== HEADER ===== -->
+  <div class="hdr" id="hdr-dash" style="display:none;">
+    <div class="brand">
+      <div class="orb">B</div>
+      <div><h1>UQ <span>BORB</span></h1><small id="hdr-sub">WALLET · AFRIQUE</small></div>
+    </div>
+    <div class="tools">
+      <button class="tbtn" id="btn-theme" title="Thème" onclick="cycleTheme()"><svg class="ic-svg" id="theme-ic"><use href="#i-moon"/></svg></button>
+      <button class="tbtn" id="btn-mask" title="Masquer" onclick="toggleMask()"><svg class="ic-svg"><use href="#i-mask"/></svg></button>
+      <div class="net">Live</div>
+    </div>
+  </div>
+
+  <!-- ===== VERROU ===== -->
+  <div id="lock-screen">
+    <div class="card" style="width:100%;max-width:360px;">
+      <div class="hero" style="padding:10px 0;">
+        <div class="big-orb" style="width:64px;height:64px;font-size:26px;">🔒</div>
+        <h2 style="font-size:19px;">Wallet verrouillé</h2>
+        <p>Code PIN pour ouvrir — la phrase reste exigée pour la session.</p>
+      </div>
+      <label>Identifiant UQ</label>
+      <input id="lock-uq" placeholder="UQ-230354360" autocomplete="off">
+      <label>Code PIN (4-6 chiffres)</label>
+      <input id="lock-pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off">
+      <button class="btn btn-gold" onclick="deverrouiller()">Déverrouiller</button>
+      <div class="err" id="lock-err"></div>
+    </div>
+  </div>
+
+  <!-- ===== AUTH ===== -->
+  <div id="screen-auth" class="hidden">
+    <div class="hero">
+      <div class="big-orb">◉</div>
+      <h2>UQ <span>BORB</span> WALLET</h2>
+      <p>Compte autonome — hors plateforme UQ</p>
+      <div class="uqline"><span class="d"></span><b>UQ</b><span class="d"></span><span>BORB</span><span class="d"></span><span>Z</span></div>
+    </div>
+    <div class="card">
+      <h2 style="font-size:16px;">Connexion wallet</h2>
+      <p style="color:var(--mut);font-size:12px;margin-top:4px;">Identifiant UQ + phrase 24 mots + code PIN.</p>
+      <label>Identifiant UQ</label>
+      <input id="in-uq" placeholder="UQ-230354360" autocomplete="off">
+      <label>Phrase de sécurité — 24 mots</label>
+      <textarea id="in-seed" placeholder="mot1 mot2 mot3 … mot24" autocomplete="off"></textarea>
+      <button class="seed-toggle" onclick="toggleSeed()">👁 24 mots — toucher pour afficher/masquer</button>
+      <div id="seed-preview" class="seed-words hidden"></div>
+      <div class="row">
+        <div style="flex:2;"><label>Code PIN (4-6 chiffres)</label>
+        <input id="in-pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off"></div>
+        <div style="flex:1;display:flex;align-items:flex-end;">
+          <button class="btn btn-ghost" style="margin-top:26px;" onclick="genererSeed()">🎲</button>
+        </div>
+      </div>
+      <button class="btn btn-gold" id="btn-login" onclick="connecter()">Se connecter</button>
+      <button class="btn btn-ghost" id="btn-create" onclick="creerCompte()">Créer ce compte BORB</button>
+      <button class="btn btn-blue" onclick="ouvrirHorsLigne()">🗝️ Wallet hors-ligne</button>
+      <div class="err" id="auth-err"></div>
+      <div class="okm" id="auth-ok"></div>
+    </div>
+    <div class="card">
+      <label>Ouvrir l'application UQZ</label>
+      <div class="row">
+        <input id="uqz-url" placeholder="https://… (URL de l'app UQZ)" style="flex:2;">
+        <button class="mini-btn" style="flex:1;margin-top:0;" onclick="ouvrirUqz()">Ouvrir ↗</button>
+      </div>
+      <p style="color:var(--mut);font-size:11px;margin-top:8px;">Ce wallet est le wallet BORB d'UQ — l'app complète s'ouvre ici.</p>
+    </div>
+  </div>
+
+  <!-- ===== PAGE : ACCUEIL ===== -->
+  <div id="page-home" class="page on">
+    <div class="card" style="margin-top:10px;">
+      <div class="card-h"><span class="card-t">Solde BORB</span>
+        <button class="tbtn" onclick="toggleSolde()" style="width:30px;height:30px;"><svg class="ic-svg"><use href="#i-eye"/></svg></button></div>
+      <div class="bal">
+        <div class="v" id="bal-borb">—</div>
+        <div class="u" id="bal-usd"></div>
+        <div class="rate" id="bal-live"></div>
+      </div>
+      <div style="text-align:center;margin-top:6px;"><span class="pseudo-tag" id="pseudo-tag">@Trader</span></div>
+      <div class="addr-chip" style="margin-top:12px;"><span id="addr-uq" style="flex:1;"></span><button onclick="copierAddr()">Copier</button></div>
+      <div class="grid4">
+        <div class="g4" onclick="ouvrirEnvoyer()"><span class="ic"><svg class="ic-svg lg"><use href="#i-send"/></svg></span><span class="lb">Envoyer</span></div>
+        <div class="g4" onclick="ouvrirRecevoir()"><span class="ic"><svg class="ic-svg lg"><use href="#i-recv"/></svg></span><span class="lb">Recevoir</span></div>
+        <div class="g4" onclick="ouvrirCarnet()"><span class="ic"><svg class="ic-svg lg"><use href="#i-book"/></svg></span><span class="lb">Carnet</span></div>
+        <div class="g4" onclick="ouvrirVW()"><span class="ic"><svg class="ic-svg lg"><use href="#i-wallet"/></svg></span><span class="lb">Portefeuille $</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><span class="card-t">Activité récente</span></div>
+      <div id="tx-list"><div class="tx-item"><span class="t">Aucune transaction pour l'instant</span></div></div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE : TRADING P2P ===== -->
+  <div id="page-trade" class="page">
+    <div class="trade-head">
+      <button class="back-b" onclick="navGo('home')"><svg class="ic-svg"><use href="#i-back"/></svg></button>
+      <h2>Trading P2P</h2>
+      <div class="net">Mobile money</div>
+    </div>
+    <div class="card" style="margin-top:6px;">
+      <div class="tabs" style="margin-top:0;">
+        <button class="tab buy on" id="tk-achat" onclick="tradeFiltre('achat')">Je veux acheter</button>
+        <button class="tab sell" id="tk-vente" onclick="tradeFiltre('vente')">Je veux vendre</button>
+      </div>
+      <div class="row">
+        <select id="tf-devise"><option value="">USD + CDF</option><option value="USD">USD</option><option value="CDF">CDF</option></select>
+        <select id="tf-pays"><option value="">Tous pays</option></select>
+      </div>
+      <div style="font-size:10px;color:var(--mut);margin-top:8px;">Offres du carnet — max 100 USD / 100 000 CDF par ordre · code temporaire pour le règlement.</div>
+      <div id="trade-list" style="margin-top:8px;"></div>
+      <button class="mini-btn" style="margin-top:12px;" onclick="ouvrirCarnetSheet()">+ Publier mon offre</button>
+    </div>
+    <div class="card">
+      <div class="card-h"><span class="card-t">Mes ordres en cours</span></div>
+      <div id="trade-mes" style="margin-top:6px;"></div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE : CARNET ===== -->
+  <div id="page-carnet" class="page">
+    <div class="trade-head">
+      <h2 style="flex:1;">Carnet d'ordre</h2>
+      <div class="net">Escrow</div>
+    </div>
+    <div class="card">
+      <div class="tabs">
+        <button class="tab on buy" id="ct-mes" onclick="carnetTab('mes')">Mes ordres</button>
+        <button class="tab" id="ct-public" onclick="carnetTab('public')">Carnet public</button>
+      </div>
+      <div id="carnet-mes">
+        <button class="btn btn-gold" style="margin-top:0;" onclick="toggleFormOrdre()">+ Nouvel ordre</button>
+        <div id="form-ordre" class="hidden" style="margin-top:14px;">
+          <label>Sens</label>
+          <div class="tabs">
+            <button class="tab on sell" id="cote-vente" onclick="setCote('vente')">Vente</button>
+            <button class="tab buy" id="cote-achat" onclick="setCote('achat')">Achat</button>
+          </div>
+          <label>Montant BORB</label>
+          <input id="ord-borb" type="text" inputmode="decimal" placeholder="0.00">
+          <label>Montant reçu/payé</label>
+          <div class="row">
+            <input id="ord-especes" type="text" inputmode="decimal" placeholder="Montant">
+            <select id="ord-devise" style="max-width:110px;"><option value="USD">USD</option><option value="CDF">CDF</option></select>
+          </div>
+          <label>Pays</label>
+          <select id="ord-pays"></select>
+          <button class="btn btn-green" id="btn-ordre" onclick="creerOrdre()">Publier l'ordre</button>
+          <div class="err" id="ordre-err"></div>
+          <div class="okm" id="ordre-ok"></div>
+        </div>
+        <div id="mes-ordres" style="margin-top:14px;"></div>
+      </div>
+      <div id="carnet-public" class="hidden">
+        <label>Filtrer</label>
+        <div class="row">
+          <select id="pub-cote"><option value="">Achat + Vente</option><option value="achat">Achats</option><option value="vente">Ventes</option></select>
+          <select id="pub-pays"><option value="">Tous pays</option></select>
+        </div>
+        <button class="mini-btn" style="margin-top:10px;" onclick="chargerCarnet()">Actualiser</button>
+        <div id="pub-ordres" style="margin-top:10px;"></div>
+        <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px;">
+          <label>Je suis agent — pourvoir un ordre</label>
+          <input id="ag-id" placeholder="ORD-000123">
+          <div class="row" style="margin-top:8px;">
+            <input id="ag-code" placeholder="Code 6 chiffres" inputmode="numeric" maxlength="6">
+            <input id="ag-uq" placeholder="Votre UQ" style="max-width:130px;">
+          </div>
+          <button class="mini-btn" onclick="pourvoirOrdre()">Confirmer le règlement</button>
+          <div class="err" id="ag-err"></div>
+          <div class="okm" id="ag-ok"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE : PROFIL ===== -->
+  <div id="page-profile" class="page">
+    <div class="trade-head">
+      <h2 style="flex:1;">Profil</h2>
+      <div class="net">Local</div>
+    </div>
+    <div class="card">
+      <div style="text-align:center;padding:10px 0 4px;">
+        <div style="width:64px;height:64px;margin:0 auto;border-radius:50%;background:linear-gradient(135deg,var(--gold2),var(--gold));display:flex;align-items:center;justify-content:center;font-size:28px;color:#1a1200;font-weight:800;" id="pf-ava">T</div>
+        <div class="pseudo-tag" id="pf-pseudo" style="margin-top:10px;">@Trader</div>
+      </div>
+      <div class="kv"><span>Identifiant technique</span><b id="pf-uq" style="font-size:11px;">—</b></div>
+      <div class="kv"><span>Clé publique</span><b id="pf-vk" style="font-size:10px;word-break:break-all;">—</b></div>
+      <div class="kv"><span>Bande réseau</span><b id="pf-bande">—</b></div>
+      <div class="kv"><span>Connexion à</span><b id="pf-login">—</b></div>
+      <div class="kv"><span>Appareil</span><b id="pf-device" style="font-size:11px;">—</b></div>
+      <div class="kv"><span>Position</span><b id="pf-geo">—</b></div>
+      <div class="kv"><span>Thème</span><b id="pf-theme">—</b></div>
+      <button class="btn btn-ghost" onclick="ouvrirUqz()">🗝️ Ouvrir UQZ</button>
+      <button class="btn btn-blue" onclick="ouvrirBinance()">🏦 Binance — dépôt / soldes</button>
+      <button class="btn btn-ghost" onclick="verrouiller()">🔒 Verrouiller</button>
+      <button class="btn btn-red" onclick="deconnecter()">Déconnexion</button>
+    </div>
+  </div>
+
+  <!-- ===== BOTTOM NAV ===== -->
+  <nav class="bnav" id="bnav" style="display:none;">
+    <button class="on" id="nav-home" onclick="navGo('home')"><svg class="ic"><use href="#i-home"/></svg>Accueil</button>
+    <button id="nav-trade" onclick="navGo('trade')"><svg class="ic"><use href="#i-conv"/></svg>Trading</button>
+    <button class="fab" onclick="ouvrirRecevoir()" title="Recevoir"><svg class="ic-svg" style="width:26px;height:26px;fill:#1a1200;"><use href="#i-recv"/></svg></button>
+    <button id="nav-carnet" onclick="navGo('carnet')"><svg class="ic"><use href="#i-book"/></svg>Carnet</button>
+    <button id="nav-profile" onclick="navGo('profile')"><svg class="ic"><use href="#i-user"/></svg>Profil</button>
+  </nav>
+
+  <!-- ===== STATUS BAR ===== -->
+  <div class="statusbar" id="statusbar" style="display:none;">
+    <span><svg class="ic"><use href="#i-clock"/></svg><span id="sb-time">—</span></span>
+    <span><svg class="ic"><use href="#i-pin"/></svg><span id="sb-geo">GPS…</span></span>
+    <span><svg class="ic"><use href="#i-user"/></svg><span id="sb-dev">—</span></span>
+  </div>
+
+  <!-- ===== SHEET : ENVOYER ===== -->
+  <div id="sheet-send" class="sheet hidden">
+    <div class="inner">
+      <button class="close-x" onclick="fermerSheets()">✕</button>
+      <h2>Envoyer</h2>
+      <p class="sub">USD / CDF / BORB — le BORB réel part en arrière-plan au taux live.</p>
+      <label>Destinataire (UQ ou scannez)</label>
+      <div class="row">
+        <input id="send-to" placeholder="UQ-00000002" style="flex:2;">
+        <button class="mini-btn" style="flex:1;margin-top:0;" onclick="ouvrirScan()">📷</button>
+      </div>
+      <div class="dev-chips" id="send-dev-chips">
+        <div class="dev-chip on" data-dev="BORB" onclick="sendSetDev('BORB')">BORB</div>
+        <div class="dev-chip" data-dev="USD" onclick="sendSetDev('USD')">USD $</div>
+        <div class="dev-chip" data-dev="CDF" onclick="sendSetDev('CDF')">CDF</div>
+      </div>
+      <label>Montant (<span id="send-dev-lb">BORB</span>)</label>
+      <input id="send-amount" type="text" inputmode="decimal" placeholder="0.00">
+      <div class="quick-row" id="send-quick">
+        <div class="quick-chip" onclick="sendQuick(10)">10</div>
+        <div class="quick-chip" onclick="sendQuick(50)">50</div>
+        <div class="quick-chip" onclick="sendQuick(100)">100</div>
+        <div class="quick-chip" onclick="sendQuick(-1)">Max</div>
+      </div>
+      <label>Frais (BORB, optionnel)</label>
+      <input id="send-fee" type="text" inputmode="decimal" placeholder="0">
+      <div class="kv" style="margin-top:14px;"><span id="send-conv-lb">Montant en USD</span><b id="send-usd">—</b></div>
+      <div class="kv"><span>Règlement réel</span><b id="send-borb-real">—</b></div>
+      <button class="btn btn-green" id="btn-send" onclick="envoyerBorb()">Envoyer</button>
+      <div class="err" id="send-err"></div>
+      <div class="okm" id="send-ok"></div>
+    </div>
+  </div>
+
+  <!-- ===== SHEET : RECEVOIR ===== -->
+  <div id="sheet-recv" class="sheet hidden">
+    <div class="inner">
+      <button class="close-x" onclick="fermerSheets()">✕</button>
+      <h2>Recevoir des BORB</h2>
+      <p class="sub">Faites scanner ce QR ou donnez votre adresse.</p>
+      <div class="qr-box"><div id="qr-canvas"></div></div>
+      <div class="addr-chip"><span id="recv-uq" style="flex:1;"></span><button onclick="copierAddr()">Copier</button></div>
+      <div class="info-box">Le BORB reçu arrive après confirmation du nœud — réserve du réseau, pas une devise fiat.</div>
+      <button class="btn btn-gold" onclick="fermerSheets()">Fermer</button>
+    </div>
+  </div>
+
+  <!-- ===== SHEET : SCAN ===== -->
+  <div id="sheet-scan" class="sheet hidden">
+    <div class="inner">
+      <button class="close-x" onclick="fermerScan()">✕</button>
+      <h2>Scanner une adresse</h2>
+      <p class="sub">Pointez la caméra sur le QR UQ/BORB.</p>
+      <video id="scan-video" autoplay playsinline muted></video>
+      <div class="err" id="scan-err"></div>
+      <button class="btn btn-ghost" onclick="fermerScan()">Annuler</button>
+    </div>
+  </div>
+
+  <!-- ===== SHEET : CONVERTIR ===== -->
+  <div id="sheet-conv" class="sheet hidden">
+    <div class="inner">
+      <button class="close-x" onclick="fermerSheets()">✕</button>
+      <h2>Convertir</h2>
+      <p class="sub">Taux live du nœud — BORB ↔ USD ↔ CDF ↔ points UQ.</p>
+      <label>Montant BORB</label>
+      <input id="cv-borb" type="text" inputmode="decimal" placeholder="0.00" oninput="convCalc()">
+      <div class="conv-row"><div class="conv-box"><div class="cl">≈ USD</div><div class="cv" id="cv-usd">—</div></div>
+      <div class="conv-box"><div class="cl">≈ CDF</div><div class="cv" id="cv-cdf">—</div></div></div>
+      <div class="kv"><span>Points UQ (1 BORB = 100 pts)</span><b id="cv-points">—</b></div>
+      <div class="kv"><span>Taux live</span><b id="cv-taux">—</b></div>
+      <div class="info-box">Conversion indicative — le règlement BORB↔espèces passe par le carnet d'ordre.</div>
+      <button class="btn btn-gold" onclick="fermerSheets()">Fermer</button>
+    </div>
+  </div>
+
+  <!-- ===== SHEET : WALLET VIRTUEL USD (local) ===== -->
+  <div id="sheet-vw" class="sheet hidden">
+    <div class="inner">
+      <button class="close-x" onclick="fermerSheets()">✕</button>
+      <h2>Portefeuille virtuel</h2>
+      <p class="sub">Soldes USD / CDF <b>locaux à cet appareil</b> — aucune donnée ne quitte le device. Le BORB réel reste la réserve en arrière-plan.</p>
+      <div class="dev-chips">
+        <div class="dev-chip on" id="vw-chip-USD" onclick="vwSetDev('USD')">USD $</div>
+        <div class="dev-chip" id="vw-chip-CDF" onclick="vwSetDev('CDF')">CDF</div>
+      </div>
+      <div class="vw-bal"><div class="v" id="vw-bal">0.00 <small>USD</small></div><span class="vw-tag">💾 stocké localement</span></div>
+      <div class="kv"><span>≈ en BORB (taux live)</span><b id="vw-borb-eq">—</b></div>
+      <div class="row" style="margin-top:10px;">
+        <input id="vw-montant" type="text" inputmode="decimal" placeholder="Montant">
+        <button class="mini-btn" style="margin-top:0;background:var(--green);" onclick="vwMove('in')">+ Déposer</button>
+      </div>
+      <button class="mini-btn" style="background:var(--red);" onclick="vwMove('out')">− Retirer</button>
+      <button class="mini-btn" style="background:var(--blue);margin-top:8px;" onclick="ouvrirSwap()">⇄ Convertir (swap)</button>
+      <div id="vw-log" style="margin-top:14px;"></div>
+      <div class="err" id="vw-err"></div>
+      <button class="btn btn-gold" onclick="fermerSheets()">Fermer</button>
+    </div>
+  </div>
+
+  <!-- ===== SHEET : SWAP / CONVERSION ===== -->
+  <div id="sheet-swap" class="sheet hidden">
+    <div class="inner">
+      <button class="close-x" onclick="fermerSheets()">✕</button>
+      <h2>Échangez vos actifs</h2>
+      <p class="sub">BORB ↔ USD ↔ CDF — taux live du nœud, BORB réel en arrière-plan.</p>
+      <div class="swap-pair">
+        <div class="swap-box sel" id="sw-from-box" onclick="swPicker('from')">
+          <div class="sl">Vous payez</div>
+          <div class="sv" id="sw-from-val">—</div>
+          <div class="sl" id="sw-from-dev" style="margin-top:4px;">USD</div>
+        </div>
+        <div class="swap-mid" onclick="swFlip()">⇅</div>
+        <div class="swap-box" id="sw-to-box" onclick="swPicker('to')">
+          <div class="sl">Vous recevez</div>
+          <div class="sv" id="sw-to-val">—</div>
+          <div class="sl" id="sw-to-dev" style="margin-top:4px;">BORB</div>
+        </div>
+      </div>
+      <input id="sw-montant" type="text" inputmode="decimal" placeholder="Montant" oninput="swCalc()">
+      <div class="quick-row">
+        <div class="quick-chip" onclick="swQuick(10)">10</div>
+        <div class="quick-chip" onclick="swQuick(50)">50</div>
+        <div class="quick-chip" onclick="swQuick(100)">100</div>
+        <div class="quick-chip" onclick="swQuick(-1)">Max</div>
+      </div>
+      <div class="kv"><span>Frais estimés (0.1%)</span><b id="sw-fee">—</b></div>
+      <div class="kv"><span>Vous recevrez</span><b id="sw-receive">—</b></div>
+      <div class="kv"><span>Taux utilisé</span><b id="sw-taux">—</b></div>
+      <div class="info-box" id="sw-note">La conversion fiat↔fiat est locale à l'appareil. BORB↔fiat utilise le taux live ; le BORB réel ne bouge que via un envoi ou un ordre.</div>
+      <button class="btn btn-green" onclick="swExec()">Convertir</button>
+      <div class="err" id="sw-err"></div>
+      <div class="okm" id="sw-ok"></div>
+      <button class="btn btn-gold" onclick="fermerSheets()">Fermer</button>
+    </div>
+  </div>
+
+  <!-- ===== SHEET : HORS-LIGNE ===== -->
+  <div id="sheet-offline" class="sheet hidden">
+    <div class="inner">
+      <button class="close-x" onclick="fermerSheets()">✕</button>
+      <h2>Wallet hors-ligne</h2>
+      <p class="sub">Phrase 24 mots + clé Ed25519 <b>sans serveur</b>. Notez la phrase — elle est votre seule clé.</p>
+      <button class="btn btn-blue" onclick="genOffline()">Générer une phrase hors-ligne</button>
+      <div id="offline-out"></div>
+      <div id="offline-register" class="hidden">
+        <label>Identifiant UQ pour rattacher</label>
+        <input id="off-uq" placeholder="UQ-230354360">
+        <button class="btn btn-green" onclick="registerOffline()">Rattacher au nœud BORB</button>
+      </div>
+      <div class="warn-box">Une phrase hors-ligne n'est PAS un compte tant qu'elle n'est pas rattachée. Perdue = irrécupérable.</div>
+      <button class="btn btn-gold" onclick="fermerSheets()">Fermer</button>
+    </div>
+  </div>
+
+  <!-- ===== SHEET : BINANCE ===== -->
+  <div id="sheet-binance" class="sheet hidden">
+    <div class="inner">
+      <button class="close-x" onclick="fermerSheets()">✕</button>
+      <h2>Binance</h2>
+      <p class="sub">Dépôt USDT et soldes — vos clés API restent <b>sur cet appareil</b>, jamais envoyées au nœud BORB.</p>
+      <div id="bn-not-connected">
+        <div class="warn-box">⚠️ Collez vos propres clés API Binance (lecture seule recommandée). Elles sont stockées localement sur cet appareil — ne les partagez pas.</div>
+        <label>API Key</label>
+        <input id="bn-key" placeholder="Votre API Key Binance" autocomplete="off">
+        <label>Secret Key</label>
+        <input id="bn-secret" type="password" placeholder="Votre Secret Key" autocomplete="off">
+        <button class="btn btn-blue" onclick="bnConnecter()">Connecter Binance</button>
+      </div>
+      <div id="bn-connected" class="hidden">
+        <div class="kv"><span>Clé API</span><b id="bn-key-show" style="font-size:10px;word-break:break-all;">—</b></div>
+        <div class="kv"><span>Mode</span><b>Dépôt · Soldes · Prix P2P</b></div>
+        <button class="mini-btn" style="margin-top:12px;" onclick="bnSoldes()">Actualiser les soldes</button>
+        <button class="mini-btn" style="margin-top:8px;background:var(--gold);color:#1a1200;" onclick="bnDepot()">Adresse de dépôt USDT</button>
+        <button class="mini-btn ghost" style="margin-top:8px;" onclick="bnDeconnecter()">Déconnecter</button>
+        <div id="bn-result"></div>
+      </div>
+      <div class="err" id="bn-err"></div>
+    </div>
+  </div>
+
+  <!-- ===== MASQUER ===== -->
+  <div id="mask-screen" onclick="toggleMask()"><div class="m">🔒<br>Écran masqué — touchez pour réafficher</div></div>
+</div>
+
+<script>
+!function(i){"use strict";var m=function(r,n){this.hi=0|r,this.lo=0|n},v=function(r){var n,e=new Float64Array(16);if(r)for(n=0;n<r.length;n++)e[n]=r[n];return e},a=function(){throw new Error("no PRNG")},o=new Uint8Array(16),e=new Uint8Array(32);e[0]=9;var c=v(),w=v([1]),g=v([56129,1]),y=v([30883,4953,19914,30187,55467,16705,2637,112,59544,30585,16505,36039,65139,11119,27886,20995]),l=v([61785,9906,39828,60374,45398,33411,5274,224,53552,61171,33010,6542,64743,22239,55772,9222]),t=v([54554,36645,11616,51542,42930,38181,51040,26924,56412,64982,57905,49316,21502,52590,14035,8553]),f=v([26200,26214,26214,26214,26214,26214,26214,26214,26214,26214,26214,26214,26214,26214,26214,26214]),s=v([41136,18958,6951,50414,58488,44335,6150,12099,55207,15867,153,11085,57099,20417,9344,11139]);function h(r,n){return r<<n|r>>>32-n}function b(r,n){var e=255&r[n+3];return(e=(e=e<<8|255&r[n+2])<<8|255&r[n+1])<<8|255&r[n+0]}function B(r,n){var e=r[n]<<24|r[n+1]<<16|r[n+2]<<8|r[n+3],t=r[n+4]<<24|r[n+5]<<16|r[n+6]<<8|r[n+7];return new m(e,t)}function p(r,n,e){var t;for(t=0;t<4;t++)r[n+t]=255&e,e>>>=8}function S(r,n,e){r[n]=e.hi>>24&255,r[n+1]=e.hi>>16&255,r[n+2]=e.hi>>8&255,r[n+3]=255&e.hi,r[n+4]=e.lo>>24&255,r[n+5]=e.lo>>16&255,r[n+6]=e.lo>>8&255,r[n+7]=255&e.lo}function u(r,n,e,t,o){var i,a=0;for(i=0;i<o;i++)a|=r[n+i]^e[t+i];return(1&a-1>>>8)-1}function A(r,n,e,t){return u(r,n,e,t,16)}function _(r,n,e,t){return u(r,n,e,t,32)}function U(r,n,e,t,o){var i,a,f,u=new Uint32Array(16),c=new Uint32Array(16),w=new Uint32Array(16),y=new Uint32Array(4);for(i=0;i<4;i++)c[5*i]=b(t,4*i),c[1+i]=b(e,4*i),c[6+i]=b(n,4*i),c[11+i]=b(e,16+4*i);for(i=0;i<16;i++)w[i]=c[i];for(i=0;i<20;i++){for(a=0;a<4;a++){for(f=0;f<4;f++)y[f]=c[(5*a+4*f)%16];for(y[1]^=h(y[0]+y[3]|0,7),y[2]^=h(y[1]+y[0]|0,9),y[3]^=h(y[2]+y[1]|0,13),y[0]^=h(y[3]+y[2]|0,18),f=0;f<4;f++)u[4*a+(a+f)%4]=y[f]}for(f=0;f<16;f++)c[f]=u[f]}if(o){for(i=0;i<16;i++)c[i]=c[i]+w[i]|0;for(i=0;i<4;i++)c[5*i]=c[5*i]-b(t,4*i)|0,c[6+i]=c[6+i]-b(n,4*i)|0;for(i=0;i<4;i++)p(r,4*i,c[5*i]),p(r,16+4*i,c[6+i])}else for(i=0;i<16;i++)p(r,4*i,c[i]+w[i]|0)}function E(r,n,e,t){U(r,n,e,t,!1)}function x(r,n,e,t){return U(r,n,e,t,!0),0}var d=new Uint8Array([101,120,112,97,110,100,32,51,50,45,98,121,116,101,32,107]);function K(r,n,e,t,o,i,a){var f,u,c=new Uint8Array(16),w=new Uint8Array(64);if(!o)return 0;for(u=0;u<16;u++)c[u]=0;for(u=0;u<8;u++)c[u]=i[u];for(;64<=o;){for(E(w,c,a,d),u=0;u<64;u++)r[n+u]=(e?e[t+u]:0)^w[u];for(f=1,u=8;u<16;u++)f=f+(255&c[u])|0,c[u]=255&f,f>>>=8;o-=64,n+=64,e&&(t+=64)}if(0<o)for(E(w,c,a,d),u=0;u<o;u++)r[n+u]=(e?e[t+u]:0)^w[u];return 0}function Y(r,n,e,t,o){return K(r,n,null,0,e,t,o)}function L(r,n,e,t,o){var i=new Uint8Array(32);return x(i,t,o,d),Y(r,n,e,t.subarray(16),i)}function T(r,n,e,t,o,i,a){var f=new Uint8Array(32);return x(f,i,a,d),K(r,n,e,t,o,i.subarray(16),f)}function k(r,n){var e,t=0;for(e=0;e<17;e++)t=t+(r[e]+n[e]|0)|0,r[e]=255&t,t>>>=8}var z=new Uint32Array([5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,252]);function R(r,n,e,t,o,i){var a,f,u,c,w=new Uint32Array(17),y=new Uint32Array(17),l=new Uint32Array(17),s=new Uint32Array(17),h=new Uint32Array(17);for(u=0;u<17;u++)y[u]=l[u]=0;for(u=0;u<16;u++)y[u]=i[u];for(y[3]&=15,y[4]&=252,y[7]&=15,y[8]&=252,y[11]&=15,y[12]&=252,y[15]&=15;0<o;){for(u=0;u<17;u++)s[u]=0;for(u=0;u<16&&u<o;++u)s[u]=e[t+u];for(s[u]=1,t+=u,o-=u,k(l,s),f=0;f<17;f++)for(u=w[f]=0;u<17;u++)w[f]=w[f]+l[u]*(u<=f?y[f-u]:320*y[f+17-u]|0)|0;for(f=0;f<17;f++)l[f]=w[f];for(u=c=0;u<16;u++)c=c+l[u]|0,l[u]=255&c,c>>>=8;for(c=c+l[16]|0,l[16]=3&c,c=5*(c>>>2)|0,u=0;u<16;u++)c=c+l[u]|0,l[u]=255&c,c>>>=8;c=c+l[16]|0,l[16]=c}for(u=0;u<17;u++)h[u]=l[u];for(k(l,z),a=0|-(l[16]>>>7),u=0;u<17;u++)l[u]^=a&(h[u]^l[u]);for(u=0;u<16;u++)s[u]=i[u+16];for(s[16]=0,k(l,s),u=0;u<16;u++)r[n+u]=l[u];return 0}function P(r,n,e,t,o,i){var a=new Uint8Array(16);return R(a,0,e,t,o,i),A(r,n,a,0)}function M(r,n,e,t,o){var i;if(e<32)return-1;for(T(r,0,n,0,e,t,o),R(r,16,r,32,e-32,r),i=0;i<16;i++)r[i]=0;return 0}function N(r,n,e,t,o){var i,a=new Uint8Array(32);if(e<32)return-1;if(L(a,0,32,t,o),0!==P(n,16,n,32,e-32,a))return-1;for(T(r,0,n,0,e,t,o),i=0;i<32;i++)r[i]=0;return 0}function O(r,n){var e;for(e=0;e<16;e++)r[e]=0|n[e]}function C(r){var n,e;for(e=0;e<16;e++)r[e]+=65536,n=Math.floor(r[e]/65536),r[(e+1)*(e<15?1:0)]+=n-1+37*(n-1)*(15===e?1:0),r[e]-=65536*n}function F(r,n,e){for(var t,o=~(e-1),i=0;i<16;i++)t=o&(r[i]^n[i]),r[i]^=t,n[i]^=t}function Z(r,n){var e,t,o,i=v(),a=v();for(e=0;e<16;e++)a[e]=n[e];for(C(a),C(a),C(a),t=0;t<2;t++){for(i[0]=a[0]-65517,e=1;e<15;e++)i[e]=a[e]-65535-(i[e-1]>>16&1),i[e-1]&=65535;i[15]=a[15]-32767-(i[14]>>16&1),o=i[15]>>16&1,i[14]&=65535,F(a,i,1-o)}for(e=0;e<16;e++)r[2*e]=255&a[e],r[2*e+1]=a[e]>>8}function G(r,n){var e=new Uint8Array(32),t=new Uint8Array(32);return Z(e,r),Z(t,n),_(e,0,t,0)}function q(r){var n=new Uint8Array(32);return Z(n,r),1&n[0]}function D(r,n){var e;for(e=0;e<16;e++)r[e]=n[2*e]+(n[2*e+1]<<8);r[15]&=32767}function I(r,n,e){var t;for(t=0;t<16;t++)r[t]=n[t]+e[t]|0}function V(r,n,e){var t;for(t=0;t<16;t++)r[t]=n[t]-e[t]|0}function X(r,n,e){var t,o,i=new Float64Array(31);for(t=0;t<31;t++)i[t]=0;for(t=0;t<16;t++)for(o=0;o<16;o++)i[t+o]+=n[t]*e[o];for(t=0;t<15;t++)i[t]+=38*i[t+16];for(t=0;t<16;t++)r[t]=i[t];C(r),C(r)}function j(r,n){X(r,n,n)}function H(r,n){var e,t=v();for(e=0;e<16;e++)t[e]=n[e];for(e=253;0<=e;e--)j(t,t),2!==e&&4!==e&&X(t,t,n);for(e=0;e<16;e++)r[e]=t[e]}function J(r,n){var e,t=v();for(e=0;e<16;e++)t[e]=n[e];for(e=250;0<=e;e--)j(t,t),1!==e&&X(t,t,n);for(e=0;e<16;e++)r[e]=t[e]}function Q(r,n,e){var t,o,i=new Uint8Array(32),a=new Float64Array(80),f=v(),u=v(),c=v(),w=v(),y=v(),l=v();for(o=0;o<31;o++)i[o]=n[o];for(i[31]=127&n[31]|64,i[0]&=248,D(a,e),o=0;o<16;o++)u[o]=a[o],w[o]=f[o]=c[o]=0;for(f[0]=w[0]=1,o=254;0<=o;--o)F(f,u,t=i[o>>>3]>>>(7&o)&1),F(c,w,t),I(y,f,c),V(f,f,c),I(c,u,w),V(u,u,w),j(w,y),j(l,f),X(f,c,f),X(c,u,y),I(y,f,c),V(f,f,c),j(u,f),V(c,w,l),X(f,c,g),I(f,f,w),X(c,c,f),X(f,w,l),X(w,u,a),j(u,y),F(f,u,t),F(c,w,t);for(o=0;o<16;o++)a[o+16]=f[o],a[o+32]=c[o],a[o+48]=u[o],a[o+64]=w[o];var s=a.subarray(32),h=a.subarray(16);return H(s,s),X(h,h,s),Z(r,h),0}function W(r,n){return Q(r,n,e)}function $(r,n){return a(n,32),W(r,n)}function rr(r,n,e){var t=new Uint8Array(32);return Q(t,e,n),x(r,o,t,d)}var nr=M,er=N;function tr(){var r,n,e,t=0,o=0,i=0,a=0,f=65535;for(e=0;e<arguments.length;e++)t+=(r=arguments[e].lo)&f,o+=r>>>16,i+=(n=arguments[e].hi)&f,a+=n>>>16;return new m((i+=(o+=t>>>16)>>>16)&f|(a+=i>>>16)<<16,t&f|o<<16)}function or(r,n){return new m(r.hi>>>n,r.lo>>>n|r.hi<<32-n)}function ir(){var r,n=0,e=0;for(r=0;r<arguments.length;r++)n^=arguments[r].lo,e^=arguments[r].hi;return new m(e,n)}function ar(r,n){var e,t,o=32-n;return n<32?(e=r.hi>>>n|r.lo<<o,t=r.lo>>>n|r.hi<<o):n<64&&(e=r.lo>>>n|r.hi<<o,t=r.hi>>>n|r.lo<<o),new m(e,t)}var fr=[new m(1116352408,3609767458),new m(1899447441,602891725),new m(3049323471,3964484399),new m(3921009573,2173295548),new m(961987163,4081628472),new m(1508970993,3053834265),new m(2453635748,2937671579),new m(2870763221,3664609560),new m(3624381080,2734883394),new m(310598401,1164996542),new m(607225278,1323610764),new m(1426881987,3590304994),new m(1925078388,4068182383),new m(2162078206,991336113),new m(2614888103,633803317),new m(3248222580,3479774868),new m(3835390401,2666613458),new m(4022224774,944711139),new m(264347078,2341262773),new m(604807628,2007800933),new m(770255983,1495990901),new m(1249150122,1856431235),new m(1555081692,3175218132),new m(1996064986,2198950837),new m(2554220882,3999719339),new m(2821834349,766784016),new m(2952996808,2566594879),new m(3210313671,3203337956),new m(3336571891,1034457026),new m(3584528711,2466948901),new m(113926993,3758326383),new m(338241895,168717936),new m(666307205,1188179964),new m(773529912,1546045734),new m(1294757372,1522805485),new m(1396182291,2643833823),new m(1695183700,2343527390),new m(1986661051,1014477480),new m(2177026350,1206759142),new m(2456956037,344077627),new m(2730485921,1290863460),new m(2820302411,3158454273),new m(3259730800,3505952657),new m(3345764771,106217008),new m(3516065817,3606008344),new m(3600352804,1432725776),new m(4094571909,1467031594),new m(275423344,851169720),new m(430227734,3100823752),new m(506948616,1363258195),new m(659060556,3750685593),new m(883997877,3785050280),new m(958139571,3318307427),new m(1322822218,3812723403),new m(1537002063,2003034995),new m(1747873779,3602036899),new m(1955562222,1575990012),new m(2024104815,1125592928),new m(2227730452,2716904306),new m(2361852424,442776044),new m(2428436474,593698344),new m(2756734187,3733110249),new m(3204031479,2999351573),new m(3329325298,3815920427),new m(3391569614,3928383900),new m(3515267271,566280711),new m(3940187606,3454069534),new m(4118630271,4000239992),new m(116418474,1914138554),new m(174292421,2731055270),new m(289380356,3203993006),new m(460393269,320620315),new m(685471733,587496836),new m(852142971,1086792851),new m(1017036298,365543100),new m(1126000580,2618297676),new m(1288033470,3409855158),new m(1501505948,4234509866),new m(1607167915,987167468),new m(1816402316,1246189591)];function ur(r,n,e){var t,o,i,a=[],f=[],u=[],c=[];for(o=0;o<8;o++)a[o]=u[o]=B(r,8*o);for(var w,y,l,s,h,v,g,b,p,A,_,U,E,x,d=0;128<=e;){for(o=0;o<16;o++)c[o]=B(n,8*o+d);for(o=0;o<80;o++){for(i=0;i<8;i++)f[i]=u[i];for(t=tr(u[7],ir(ar(x=u[4],14),ar(x,18),ar(x,41)),(p=u[4],A=u[5],_=u[6],0,U=p.hi&A.hi^~p.hi&_.hi,E=p.lo&A.lo^~p.lo&_.lo,new m(U,E)),fr[o],c[o%16]),f[7]=tr(t,ir(ar(b=u[0],28),ar(b,34),ar(b,39)),(l=u[0],s=u[1],h=u[2],0,v=l.hi&s.hi^l.hi&h.hi^s.hi&h.hi,g=l.lo&s.lo^l.lo&h.lo^s.lo&h.lo,new m(v,g))),f[3]=tr(f[3],t),i=0;i<8;i++)u[(i+1)%8]=f[i];if(o%16==15)for(i=0;i<16;i++)c[i]=tr(c[i],c[(i+9)%16],ir(ar(y=c[(i+1)%16],1),ar(y,8),or(y,7)),ir(ar(w=c[(i+14)%16],19),ar(w,61),or(w,6)))}for(o=0;o<8;o++)u[o]=tr(u[o],a[o]),a[o]=u[o];d+=128,e-=128}for(o=0;o<8;o++)S(r,8*o,a[o]);return e}var cr=new Uint8Array([106,9,230,103,243,188,201,8,187,103,174,133,132,202,167,59,60,110,243,114,254,148,248,43,165,79,245,58,95,29,54,241,81,14,82,127,173,230,130,209,155,5,104,140,43,62,108,31,31,131,217,171,251,65,189,107,91,224,205,25,19,126,33,121]);function wr(r,n,e){var t,o=new Uint8Array(64),i=new Uint8Array(256),a=e;for(t=0;t<64;t++)o[t]=cr[t];for(ur(o,n,e),e%=128,t=0;t<256;t++)i[t]=0;for(t=0;t<e;t++)i[t]=n[a-e+t];for(i[e]=128,i[(e=256-128*(e<112?1:0))-9]=0,S(i,e-8,new m(a/536870912|0,a<<3)),ur(o,i,e),t=0;t<64;t++)r[t]=o[t];return 0}function yr(r,n){var e=v(),t=v(),o=v(),i=v(),a=v(),f=v(),u=v(),c=v(),w=v();V(e,r[1],r[0]),V(w,n[1],n[0]),X(e,e,w),I(t,r[0],r[1]),I(w,n[0],n[1]),X(t,t,w),X(o,r[3],n[3]),X(o,o,l),X(i,r[2],n[2]),I(i,i,i),V(a,t,e),V(f,i,o),I(u,i,o),I(c,t,e),X(r[0],a,f),X(r[1],c,u),X(r[2],u,f),X(r[3],a,c)}function lr(r,n,e){var t;for(t=0;t<4;t++)F(r[t],n[t],e)}function sr(r,n){var e=v(),t=v(),o=v();H(o,n[2]),X(e,n[0],o),X(t,n[1],o),Z(r,t),r[31]^=q(e)<<7}function hr(r,n,e){var t,o;for(O(r[0],c),O(r[1],w),O(r[2],w),O(r[3],c),o=255;0<=o;--o)lr(r,n,t=e[o/8|0]>>(7&o)&1),yr(n,r),yr(r,r),lr(r,n,t)}function vr(r,n){var e=[v(),v(),v(),v()];O(e[0],t),O(e[1],f),O(e[2],w),X(e[3],t,f),hr(r,e,n)}function gr(r,n,e){var t,o=new Uint8Array(64),i=[v(),v(),v(),v()];for(e||a(n,32),wr(o,n,32),o[0]&=248,o[31]&=127,o[31]|=64,vr(i,o),sr(r,i),t=0;t<32;t++)n[t+32]=r[t];return 0}var br=new Float64Array([237,211,245,92,26,99,18,88,214,156,247,162,222,249,222,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,16]);function pr(r,n){var e,t,o,i;for(t=63;32<=t;--t){for(e=0,o=t-32,i=t-12;o<i;++o)n[o]+=e-16*n[t]*br[o-(t-32)],e=Math.floor((n[o]+128)/256),n[o]-=256*e;n[o]+=e,n[t]=0}for(o=e=0;o<32;o++)n[o]+=e-(n[31]>>4)*br[o],e=n[o]>>8,n[o]&=255;for(o=0;o<32;o++)n[o]-=e*br[o];for(t=0;t<32;t++)n[t+1]+=n[t]>>8,r[t]=255&n[t]}function Ar(r){var n,e=new Float64Array(64);for(n=0;n<64;n++)e[n]=r[n];for(n=0;n<64;n++)r[n]=0;pr(r,e)}function _r(r,n,e,t){var o,i,a=new Uint8Array(64),f=new Uint8Array(64),u=new Uint8Array(64),c=new Float64Array(64),w=[v(),v(),v(),v()];wr(a,t,32),a[0]&=248,a[31]&=127,a[31]|=64;var y=e+64;for(o=0;o<e;o++)r[64+o]=n[o];for(o=0;o<32;o++)r[32+o]=a[32+o];for(wr(u,r.subarray(32),e+32),Ar(u),vr(w,u),sr(r,w),o=32;o<64;o++)r[o]=t[o];for(wr(f,r,e+64),Ar(f),o=0;o<64;o++)c[o]=0;for(o=0;o<32;o++)c[o]=u[o];for(o=0;o<32;o++)for(i=0;i<32;i++)c[o+i]+=f[o]*a[i];return pr(r.subarray(32),c),y}function Ur(r,n,e,t){var o,i=new Uint8Array(32),a=new Uint8Array(64),f=[v(),v(),v(),v()],u=[v(),v(),v(),v()];if(e<64)return-1;if(function(r,n){var e=v(),t=v(),o=v(),i=v(),a=v(),f=v(),u=v();if(O(r[2],w),D(r[1],n),j(o,r[1]),X(i,o,y),V(o,o,r[2]),I(i,r[2],i),j(a,i),j(f,a),X(u,f,a),X(e,u,o),X(e,e,i),J(e,e),X(e,e,o),X(e,e,i),X(e,e,i),X(r[0],e,i),j(t,r[0]),X(t,t,i),G(t,o)&&X(r[0],r[0],s),j(t,r[0]),X(t,t,i),G(t,o))return 1;q(r[0])===n[31]>>7&&V(r[0],c,r[0]),X(r[3],r[0],r[1])}(u,t))return-1;for(o=0;o<e;o++)r[o]=n[o];for(o=0;o<32;o++)r[o+32]=t[o];if(wr(a,r,e),Ar(a),hr(f,u,a),vr(u,n.subarray(32)),yr(f,u),sr(i,f),e-=64,_(n,0,i,0)){for(o=0;o<e;o++)r[o]=0;return-1}for(o=0;o<e;o++)r[o]=n[o+64];return e}function Er(r,n){if(32!==r.length)throw new Error("bad key size");if(24!==n.length)throw new Error("bad nonce size")}function xr(){for(var r=0;r<arguments.length;r++)if(!(arguments[r]instanceof Uint8Array))throw new TypeError("unexpected type, use Uint8Array")}function dr(r){for(var n=0;n<r.length;n++)r[n]=0}i.lowlevel={crypto_core_hsalsa20:x,crypto_stream_xor:T,crypto_stream:L,crypto_stream_salsa20_xor:K,crypto_stream_salsa20:Y,crypto_onetimeauth:R,crypto_onetimeauth_verify:P,crypto_verify_16:A,crypto_verify_32:_,crypto_secretbox:M,crypto_secretbox_open:N,crypto_scalarmult:Q,crypto_scalarmult_base:W,crypto_box_beforenm:rr,crypto_box_afternm:nr,crypto_box:function(r,n,e,t,o,i){var a=new Uint8Array(32);return rr(a,o,i),nr(r,n,e,t,a)},crypto_box_open:function(r,n,e,t,o,i){var a=new Uint8Array(32);return rr(a,o,i),er(r,n,e,t,a)},crypto_box_keypair:$,crypto_hash:wr,crypto_sign:_r,crypto_sign_keypair:gr,crypto_sign_open:Ur,crypto_secretbox_KEYBYTES:32,crypto_secretbox_NONCEBYTES:24,crypto_secretbox_ZEROBYTES:32,crypto_secretbox_BOXZEROBYTES:16,crypto_scalarmult_BYTES:32,crypto_scalarmult_SCALARBYTES:32,crypto_box_PUBLICKEYBYTES:32,crypto_box_SECRETKEYBYTES:32,crypto_box_BEFORENMBYTES:32,crypto_box_NONCEBYTES:24,crypto_box_ZEROBYTES:32,crypto_box_BOXZEROBYTES:16,crypto_sign_BYTES:64,crypto_sign_PUBLICKEYBYTES:32,crypto_sign_SECRETKEYBYTES:64,crypto_sign_SEEDBYTES:32,crypto_hash_BYTES:64,gf:v,D:y,L:br,pack25519:Z,unpack25519:D,M:X,A:I,S:j,Z:V,pow2523:J,add:yr,set25519:O,modL:pr,scalarmult:hr,scalarbase:vr},i.randomBytes=function(r){var n=new Uint8Array(r);return a(n,r),n},i.secretbox=function(r,n,e){xr(r,n,e),Er(e,n);for(var t=new Uint8Array(32+r.length),o=new Uint8Array(t.length),i=0;i<r.length;i++)t[i+32]=r[i];return M(o,t,t.length,n,e),o.subarray(16)},i.secretbox.open=function(r,n,e){xr(r,n,e),Er(e,n);for(var t=new Uint8Array(16+r.length),o=new Uint8Array(t.length),i=0;i<r.length;i++)t[i+16]=r[i];return t.length<32||0!==N(o,t,t.length,n,e)?null:o.subarray(32)},i.secretbox.keyLength=32,i.secretbox.nonceLength=24,i.secretbox.overheadLength=16,i.scalarMult=function(r,n){if(xr(r,n),32!==r.length)throw new Error("bad n size");if(32!==n.length)throw new Error("bad p size");var e=new Uint8Array(32);return Q(e,r,n),e},i.scalarMult.base=function(r){if(xr(r),32!==r.length)throw new Error("bad n size");var n=new Uint8Array(32);return W(n,r),n},i.scalarMult.scalarLength=32,i.scalarMult.groupElementLength=32,i.box=function(r,n,e,t){var o=i.box.before(e,t);return i.secretbox(r,n,o)},i.box.before=function(r,n){xr(r,n),function(r,n){if(32!==r.length)throw new Error("bad public key size");if(32!==n.length)throw new Error("bad secret key size")}(r,n);var e=new Uint8Array(32);return rr(e,r,n),e},i.box.after=i.secretbox,i.box.open=function(r,n,e,t){var o=i.box.before(e,t);return i.secretbox.open(r,n,o)},i.box.open.after=i.secretbox.open,i.box.keyPair=function(){var r=new Uint8Array(32),n=new Uint8Array(32);return $(r,n),{publicKey:r,secretKey:n}},i.box.keyPair.fromSecretKey=function(r){if(xr(r),32!==r.length)throw new Error("bad secret key size");var n=new Uint8Array(32);return W(n,r),{publicKey:n,secretKey:new Uint8Array(r)}},i.box.publicKeyLength=32,i.box.secretKeyLength=32,i.box.sharedKeyLength=32,i.box.nonceLength=24,i.box.overheadLength=i.secretbox.overheadLength,i.sign=function(r,n){if(xr(r,n),64!==n.length)throw new Error("bad secret key size");var e=new Uint8Array(64+r.length);return _r(e,r,r.length,n),e},i.sign.open=function(r,n){if(xr(r,n),32!==n.length)throw new Error("bad public key size");var e=new Uint8Array(r.length),t=Ur(e,r,r.length,n);if(t<0)return null;for(var o=new Uint8Array(t),i=0;i<o.length;i++)o[i]=e[i];return o},i.sign.detached=function(r,n){for(var e=i.sign(r,n),t=new Uint8Array(64),o=0;o<t.length;o++)t[o]=e[o];return t},i.sign.detached.verify=function(r,n,e){if(xr(r,n,e),64!==n.length)throw new Error("bad signature size");if(32!==e.length)throw new Error("bad public key size");var t,o=new Uint8Array(64+r.length),i=new Uint8Array(64+r.length);for(t=0;t<64;t++)o[t]=n[t];for(t=0;t<r.length;t++)o[t+64]=r[t];return 0<=Ur(i,o,o.length,e)},i.sign.keyPair=function(){var r=new Uint8Array(32),n=new Uint8Array(64);return gr(r,n),{publicKey:r,secretKey:n}},i.sign.keyPair.fromSecretKey=function(r){if(xr(r),64!==r.length)throw new Error("bad secret key size");for(var n=new Uint8Array(32),e=0;e<n.length;e++)n[e]=r[32+e];return{publicKey:n,secretKey:new Uint8Array(r)}},i.sign.keyPair.fromSeed=function(r){if(xr(r),32!==r.length)throw new Error("bad seed size");for(var n=new Uint8Array(32),e=new Uint8Array(64),t=0;t<32;t++)e[t]=r[t];return gr(n,e,!0),{publicKey:n,secretKey:e}},i.sign.publicKeyLength=32,i.sign.secretKeyLength=64,i.sign.seedLength=32,i.sign.signatureLength=64,i.hash=function(r){xr(r);var n=new Uint8Array(64);return wr(n,r,r.length),n},i.hash.hashLength=64,i.verify=function(r,n){return xr(r,n),0!==r.length&&0!==n.length&&(r.length===n.length&&0===u(r,0,n,0,r.length))},i.setPRNG=function(r){a=r},function(){var o="undefined"!=typeof self?self.crypto||self.msCrypto:null;if(o&&o.getRandomValues){i.setPRNG(function(r,n){var e,t=new Uint8Array(n);for(e=0;e<n;e+=65536)o.getRandomValues(t.subarray(e,e+Math.min(n-e,65536)));for(e=0;e<n;e++)r[e]=t[e];dr(t)})}else"undefined"!=typeof require&&(o=require("crypto"))&&o.randomBytes&&i.setPRNG(function(r,n){var e,t=o.randomBytes(n);for(e=0;e<n;e++)r[e]=t[e];dr(t)})}()}("undefined"!=typeof module&&module.exports?module.exports:self.nacl=self.nacl||{});
+</script>
+<script>
+/**
+ * Minified by jsDelivr using Terser v5.37.0.
+ * Original file: /npm/qrcode-generator@1.4.4/qrcode.js
+ *
+ * Do NOT use SRI with dynamically generated files! More information: https://www.jsdelivr.com/using-sri-with-dynamic-files
+ */
+var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],f={},c=function(t,r){o=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(i=4*e+17),l(0,0),l(i-7,0),l(0,i-7),s(),h(),d(t,r),e>=7&&v(t),null==a&&(a=p(e,n,u)),w(a,r)},l=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||i<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||i<=r+n||(o[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},h=function(){for(var t=8;t<i-8;t+=1)null==o[t][6]&&(o[t][6]=t%2==0);for(var r=8;r<i-8;r+=1)null==o[6][r]&&(o[6][r]=r%2==0)},s=function(){for(var t=B.getPatternPosition(e),r=0;r<t.length;r+=1)for(var n=0;n<t.length;n+=1){var i=t[r],a=t[n];if(null==o[i][a])for(var u=-2;u<=2;u+=1)for(var f=-2;f<=2;f+=1)o[i+u][a+f]=-2==u||2==u||-2==f||2==f||0==u&&0==f}},v=function(t){for(var r=B.getBCHTypeNumber(e),n=0;n<18;n+=1){var a=!t&&1==(r>>n&1);o[Math.floor(n/3)][n%3+i-8-3]=a}for(n=0;n<18;n+=1){a=!t&&1==(r>>n&1);o[n%3+i-8-3][Math.floor(n/3)]=a}},d=function(t,r){for(var e=n<<3|r,a=B.getBCHTypeInfo(e),u=0;u<15;u+=1){var f=!t&&1==(a>>u&1);u<6?o[u][8]=f:u<8?o[u+1][8]=f:o[i-15+u][8]=f}for(u=0;u<15;u+=1){f=!t&&1==(a>>u&1);u<8?o[8][i-u-1]=f:u<9?o[8][15-u-1+1]=f:o[8][15-u-1]=f}o[i-8][8]=!t},w=function(t,r){for(var e=-1,n=i-1,a=7,u=0,f=B.getMaskFunction(r),c=i-1;c>0;c-=2)for(6==c&&(c-=1);;){for(var g=0;g<2;g+=1)if(null==o[n][c-g]){var l=!1;u<t.length&&(l=1==(t[u]>>>a&1)),f(n,c-g)&&(l=!l),o[n][c-g]=l,-1==(a-=1)&&(u+=1,a=7)}if((n+=e)<0||i<=n){n-=e,e=-e;break}}},p=function(t,r,e){for(var n=A.getRSBlocks(t,r),o=b(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=k(i[u],l.getLength()-1).mod(l);for(a[u]=new Array(l.getLength()-1),g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=s>=0?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};f.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=M(t);break;case"Alphanumeric":e=x(t);break;case"Byte":e=m(t);break;case"Kanji":e=L(t);break;default:throw"mode:"+r}u.push(e),a=null},f.isDark=function(t,r){if(t<0||i<=t||r<0||i<=r)throw t+","+r;return o[t][r]},f.getModuleCount=function(){return i},f.make=function(){if(e<1){for(var t=1;t<40;t++){for(var r=A.getRSBlocks(t,n),o=b(),i=0;i<u.length;i++){var a=u[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var g=0;for(i=0;i<r.length;i++)g+=r[i].dataCount;if(o.getLengthInBits()<=8*g)break}e=t}c(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){c(!0,e);var n=B.getLostPoint(f);(0==e||t>n)&&(t=n,r=e)}return r}())},f.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<f.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<f.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=f.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="</tr>"}return e+="</tbody>",e+="</table>"},f.createSvgTag=function(t,r,e,n){var o={};"object"==typeof arguments[0]&&(t=(o=arguments[0]).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,c,g=f.getModuleCount()*t+2*r,l="";for(c="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",l+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',l+=o.scalable?"":' width="'+g+'px" height="'+g+'px"',l+=' viewBox="0 0 '+g+" "+g+'" ',l+=' preserveAspectRatio="xMinYMin meet"',l+=n.text||e.text?' role="img" aria-labelledby="'+y([n.id,e.id].join(" ").trim())+'"':"",l+=">",l+=n.text?'<title id="'+y(n.id)+'">'+y(n.text)+"</title>":"",l+=e.text?'<description id="'+y(e.id)+'">'+y(e.text)+"</description>":"",l+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',l+='<path d="',a=0;a<f.getModuleCount();a+=1)for(u=a*t+r,i=0;i<f.getModuleCount();i+=1)f.isDark(a,i)&&(l+="M"+(i*t+r)+","+u+c);return l+='" stroke="transparent" fill="black"/>',l+="</svg>"},f.createDataURL=function(t,r){t=t||2,r=void 0===r?4*t:r;var e=f.getModuleCount()*t+2*r,n=r,o=e-r;return I(e,e,(function(r,e){if(n<=r&&r<o&&n<=e&&e<o){var i=Math.floor((r-n)/t),a=Math.floor((e-n)/t);return f.isDark(a,i)?0:1}return 1}))},f.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=f.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=f.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=y(e),o+='"'),o+="/>"};var y=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return f.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*f.getModuleCount()+2*t,u=t,c=a-t,g={"██":"█","█ ":"▀"," █":"▄","  ":" "},l={"██":"▀","█ ":"▀"," █":" ","  ":" "},h="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<c&&u<=r&&r<c&&f.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<c&&u<=r+1&&r+1<c&&f.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",h+=t<1&&r+1>=c?l[i]:g[i];h+="\n"}return a%2&&t>0?h.substring(0,h.length-a-1)+Array(a+1).join("▀"):h.substring(0,h.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=f.getModuleCount()*t+2*r,u=r,c=a-r,g=Array(t+1).join("██"),l=Array(t+1).join("  "),h="",s="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),s="",n=0;n<a;n+=1)i=1,u<=n&&n<c&&u<=e&&e<c&&f.isDark(o,Math.floor((n-u)/t))&&(i=0),s+=i?g:l;for(o=0;o<t;o+=1)h+=s+"\n"}return h.substring(0,h.length-1)},f.renderTo2dContext=function(t,r){r=r||2;for(var e=f.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=f.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},f};t.stringToBytes=(t.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,t.createStringToBytes=function(t,r){var e=function(){for(var e=S(t),n=function(){var t=e.read();if(-1==t)throw"eof";return t},o=0,i={};;){var a=e.read();if(-1==a)break;var u=n(),f=n()<<8|n();i[String.fromCharCode(a<<8|u)]=f,o+=1}if(o!=r)throw o+" != "+r;return i}(),n="?".charCodeAt(0);return function(t){for(var r=[],o=0;o<t.length;o+=1){var i=t.charCodeAt(o);if(i<128)r.push(i);else{var a=e[t.charAt(o)];"number"==typeof a?(255&a)==a?r.push(a):(r.push(a>>>8),r.push(255&a)):r.push(n)}}return r}};var r,e,n,o,i,a=1,u=2,f=4,c=8,g={L:1,M:0,Q:3,H:2},l=0,h=1,s=2,v=3,d=4,w=5,p=6,y=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],e=1335,n=7973,i=function(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r},(o={}).getBCHTypeInfo=function(t){for(var r=t<<10;i(r)-i(e)>=0;)r^=e<<i(r)-i(e);return 21522^(t<<10|r)},o.getBCHTypeNumber=function(t){for(var r=t<<12;i(r)-i(n)>=0;)r^=n<<i(r)-i(n);return t<<12|r},o.getPatternPosition=function(t){return r[t-1]},o.getMaskFunction=function(t){switch(t){case l:return function(t,r){return(t+r)%2==0};case h:return function(t,r){return t%2==0};case s:return function(t,r){return r%3==0};case v:return function(t,r){return(t+r)%3==0};case d:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case w:return function(t,r){return t*r%2+t*r%3==0};case p:return function(t,r){return(t*r%2+t*r%3)%2==0};case y:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},o.getErrorCorrectPolynomial=function(t){for(var r=k([1],0),e=0;e<t;e+=1)r=r.multiply(k([1,C.gexp(e)],0));return r},o.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case f:case c:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case f:return 16;case c:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case f:return 16;case c:return 12;default:throw"mode:"+t}}},o.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);i>5&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},o),C=function(){for(var t=new Array(256),r=new Array(256),e=0;e<8;e+=1)t[e]=1<<e;for(e=8;e<256;e+=1)t[e]=t[e-4]^t[e-5]^t[e-6]^t[e-8];for(e=0;e<255;e+=1)r[t[e]]=e;var n={glog:function(t){if(t<1)throw"glog("+t+")";return r[t]},gexp:function(r){for(;r<0;)r+=255;for(;r>=256;)r-=255;return t[r]}};return n}();function k(t,r){if(void 0===t.length)throw t.length+"/"+r;var e=function(){for(var e=0;e<t.length&&0==t[e];)e+=1;for(var n=new Array(t.length-e+r),o=0;o<t.length-e;o+=1)n[o]=t[o+e];return n}(),n={getAt:function(t){return e[t]},getLength:function(){return e.length},multiply:function(t){for(var r=new Array(n.getLength()+t.getLength()-1),e=0;e<n.getLength();e+=1)for(var o=0;o<t.getLength();o+=1)r[e+o]^=C.gexp(C.glog(n.getAt(e))+C.glog(t.getAt(o)));return k(r,0)},mod:function(t){if(n.getLength()-t.getLength()<0)return n;for(var r=C.glog(n.getAt(0))-C.glog(t.getAt(0)),e=new Array(n.getLength()),o=0;o<n.getLength();o+=1)e[o]=n.getAt(o);for(o=0;o<t.getLength();o+=1)e[o]^=C.gexp(C.glog(t.getAt(o))+r);return k(e,0).mod(t)}};return n}var A=function(){var t=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],r=function(t,r){var e={};return e.totalCount=t,e.dataCount=r,e},e={};return e.getRSBlocks=function(e,n){var o=function(r,e){switch(e){case g.L:return t[4*(r-1)+0];case g.M:return t[4*(r-1)+1];case g.Q:return t[4*(r-1)+2];case g.H:return t[4*(r-1)+3];default:return}}(e,n);if(void 0===o)throw"bad rs block @ typeNumber:"+e+"/errorCorrectionLevel:"+n;for(var i=o.length/3,a=[],u=0;u<i;u+=1)for(var f=o[3*u+0],c=o[3*u+1],l=o[3*u+2],h=0;h<f;h+=1)a.push(r(c,l));return a},e}(),b=function(){var t=[],r=0,e={getBuffer:function(){return t},getAt:function(r){var e=Math.floor(r/8);return 1==(t[e]>>>7-r%8&1)},put:function(t,r){for(var n=0;n<r;n+=1)e.putBit(1==(t>>>r-n-1&1))},getLengthInBits:function(){return r},putBit:function(e){var n=Math.floor(r/8);t.length<=n&&t.push(0),e&&(t[n]|=128>>>r%8),r+=1}};return e},M=function(t){var r=a,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+2<r.length;)t.put(o(r.substring(n,n+3)),10),n+=3;n<r.length&&(r.length-n==1?t.put(o(r.substring(n,n+1)),4):r.length-n==2&&t.put(o(r.substring(n,n+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return n},x=function(t){var r=u,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+1<r.length;)t.put(45*o(r.charAt(n))+o(r.charAt(n+1)),11),n+=2;n<r.length&&t.put(o(r.charAt(n)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return n},m=function(r){var e=f,n=t.stringToBytes(r),o={getMode:function(){return e},getLength:function(t){return n.length},write:function(t){for(var r=0;r<n.length;r+=1)t.put(n[r],8)}};return o},L=function(r){var e=c,n=t.stringToBytesFuncs.SJIS;if(!n)throw"sjis not supported.";!function(){var t=n("友");if(2!=t.length||38726!=(t[0]<<8|t[1]))throw"sjis not supported."}();var o=n(r),i={getMode:function(){return e},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return i},D=function(){var t=[],r={writeByte:function(r){t.push(255&r)},writeShort:function(t){r.writeByte(t),r.writeByte(t>>>8)},writeBytes:function(t,e,n){e=e||0,n=n||t.length;for(var o=0;o<n;o+=1)r.writeByte(t[o+e])},writeString:function(t){for(var e=0;e<t.length;e+=1)r.writeByte(t.charCodeAt(e))},toByteArray:function(){return t},toString:function(){var r="";r+="[";for(var e=0;e<t.length;e+=1)e>0&&(r+=","),r+=t[e];return r+="]"}};return r},S=function(t){var r=t,e=0,n=0,o=0,i={read:function(){for(;o<8;){if(e>=r.length){if(0==o)return-1;throw"unexpected end of file./"+o}var t=r.charAt(e);if(e+=1,"="==t)return o=0,-1;t.match(/^\s$/)||(n=n<<6|a(t.charCodeAt(0)),o+=6)}var i=n>>>o-8&255;return o-=8,i}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return i},I=function(t,r,e){for(var n=function(t,r){var e=t,n=r,o=new Array(t*r),i={setPixel:function(t,r,n){o[r*e+t]=n},write:function(t){t.writeString("GIF87a"),t.writeShort(e),t.writeShort(n),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(e),t.writeShort(n),t.writeByte(0);var r=a(2);t.writeByte(2);for(var o=0;r.length-o>255;)t.writeByte(255),t.writeBytes(r,o,255),o+=255;t.writeByte(r.length-o),t.writeBytes(r,o,r.length-o),t.writeByte(0),t.writeString(";")}},a=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,i=u(),a=0;a<r;a+=1)i.add(String.fromCharCode(a));i.add(String.fromCharCode(r)),i.add(String.fromCharCode(e));var f,c,g,l=D(),h=(f=l,c=0,g=0,{write:function(t,r){if(t>>>r!=0)throw"length over";for(;c+r>=8;)f.writeByte(255&(t<<c|g)),r-=8-c,t>>>=8-c,g=0,c=0;g|=t<<c,c+=r},flush:function(){c>0&&f.writeByte(g)}});h.write(r,n);var s=0,v=String.fromCharCode(o[s]);for(s+=1;s<o.length;){var d=String.fromCharCode(o[s]);s+=1,i.contains(v+d)?v+=d:(h.write(i.indexOf(v),n),i.size()<4095&&(i.size()==1<<n&&(n+=1),i.add(v+d)),v=d)}return h.write(i.indexOf(v),n),h.write(e,n),h.flush(),l.toByteArray()},u=function(){var t={},r=0,e={add:function(n){if(e.contains(n))throw"dup key:"+n;t[n]=r,r+=1},size:function(){return r},indexOf:function(r){return t[r]},contains:function(r){return void 0!==t[r]}};return e};return i}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=D();n.write(a);for(var u=function(){var t=0,r=0,e=0,n="",o={},i=function(t){n+=String.fromCharCode(a(63&t))},a=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return o.writeByte=function(n){for(t=t<<8|255&n,r+=8,e+=1;r>=6;)i(t>>>r-6),r-=6},o.flush=function(){if(r>0&&(i(t<<6-r),t=0,r=0),e%3!=0)for(var o=3-e%3,a=0;a<o;a+=1)n+="="},o.toString=function(){return n},o}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return t}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||n>=57344?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}((function(){return qrcode}));
+//# sourceMappingURL=/sm/26b4b0d0b1e283d6b3ec9857ac597d7a60c76ac17be1ef4c965f03086de426bb.map
+</script>
+<script>
+const WORDLIST_DATA = ["abandon", "ability", "able", "about", "above", "absent", "absorb", "abstract", "absurd", "abuse", "access", "accident", "account", "accuse", "achieve", "acid", "acoustic", "acquire", "across", "act", "action", "actor", "actress", "actual", "adapt", "add", "addict", "address", "adjust", "admit", "adult", "advance", "advice", "aerobic", "affair", "afford", "afraid", "again", "age", "agent", "agree", "ahead", "aim", "air", "airport", "aisle", "alarm", "album", "alcohol", "alert", "alien", "all", "alley", "allow", "almost", "alone", "alpha", "already", "also", "alter", "always", "amateur", "amazing", "among", "amount", "amused", "analyst", "anchor", "ancient", "anger", "angle", "angry", "animal", "ankle", "announce", "annual", "another", "answer", "antenna", "antique", "anxiety", "any", "apart", "apology", "appear", "apple", "approve", "april", "arch", "arctic", "area", "arena", "argue", "arm", "armed", "armor", "army", "around", "arrange", "arrest", "arrive", "arrow", "art", "artefact", "artist", "artwork", "ask", "aspect", "assault", "asset", "assist", "assume", "asthma", "athlete", "atom", "attack", "attend", "attitude", "attract", "auction", "audit", "august", "aunt", "author", "auto", "autumn", "average", "avocado", "avoid", "awake", "aware", "away", "awesome", "awful", "awkward", "axis", "baby", "bachelor", "bacon", "badge", "bag", "balance", "balcony", "ball", "bamboo", "banana", "banner", "bar", "barely", "bargain", "barrel", "base", "basic", "basket", "battle", "beach", "bean", "beauty", "because", "become", "beef", "before", "begin", "behave", "behind", "believe", "below", "belt", "bench", "benefit", "best", "betray", "better", "between", "beyond", "bicycle", "bid", "bike", "bind", "biology", "bird", "birth", "bitter", "black", "blade", "blame", "blanket", "blast", "bleak", "bless", "blind", "blood", "blossom", "blouse", "blue", "blur", "blush", "board", "boat", "body", "boil", "bomb", "bone", "bonus", "book", "boost", "border", "boring", "borrow", "boss", "bottom", "bounce", "box", "boy", "bracket", "brain", "brand", "brass", "brave", "bread", "breeze", "brick", "bridge", "brief", "bright", "bring", "brisk", "broccoli", "broken", "bronze", "broom", "brother", "brown", "brush", "bubble", "buddy", "budget", "buffalo", "build", "bulb", "bulk", "bullet", "bundle", "bunker", "burden", "burger", "burst", "bus", "business", "busy", "butter", "buyer", "buzz", "cabbage", "cabin", "cable", "cactus", "cage", "cake", "call", "calm", "camera", "camp", "can", "canal", "cancel", "candy", "cannon", "canoe", "canvas", "canyon", "capable", "capital", "captain", "car", "carbon", "card", "cargo", "carpet", "carry", "cart", "case", "cash", "casino", "castle", "casual", "cat", "catalog", "catch", "category", "cattle", "caught", "cause", "caution", "cave", "ceiling", "celery", "cement", "census", "century", "cereal", "certain", "chair", "chalk", "champion", "change", "chaos", "chapter", "charge", "chase", "chat", "cheap", "check", "cheese", "chef", "cherry", "chest", "chicken", "chief", "child", "chimney", "choice", "choose", "chronic", "chuckle", "chunk", "churn", "cigar", "cinnamon", "circle", "citizen", "city", "civil", "claim", "clap", "clarify", "claw", "clay", "clean", "clerk", "clever", "click", "client", "cliff", "climb", "clinic", "clip", "clock", "clog", "close", "cloth", "cloud", "clown", "club", "clump", "cluster", "clutch", "coach", "coast", "coconut", "code", "coffee", "coil", "coin", "collect", "color", "column", "combine", "come", "comfort", "comic", "common", "company", "concert", "conduct", "confirm", "congress", "connect", "consider", "control", "convince", "cook", "cool", "copper", "copy", "coral", "core", "corn", "correct", "cost", "cotton", "couch", "country", "couple", "course", "cousin", "cover", "coyote", "crack", "cradle", "craft", "cram", "crane", "crash", "crater", "crawl", "crazy", "cream", "credit", "creek", "crew", "cricket", "crime", "crisp", "critic", "crop", "cross", "crouch", "crowd", "crucial", "cruel", "cruise", "crumble", "crunch", "crush", "cry", "crystal", "cube", "culture", "cup", "cupboard", "curious", "current", "curtain", "curve", "cushion", "custom", "cute", "cycle", "dad", "damage", "damp", "dance", "danger", "daring", "dash", "daughter", "dawn", "day", "deal", "debate", "debris", "decade", "december", "decide", "decline", "decorate", "decrease", "deer", "defense", "define", "defy", "degree", "delay", "deliver", "demand", "demise", "denial", "dentist", "deny", "depart", "depend", "deposit", "depth", "deputy", "derive", "describe", "desert", "design", "desk", "despair", "destroy", "detail", "detect", "develop", "device", "devote", "diagram", "dial", "diamond", "diary", "dice", "diesel", "diet", "differ", "digital", "dignity", "dilemma", "dinner", "dinosaur", "direct", "dirt", "disagree", "discover", "disease", "dish", "dismiss", "disorder", "display", "distance", "divert", "divide", "divorce", "dizzy", "doctor", "document", "dog", "doll", "dolphin", "domain", "donate", "donkey", "donor", "door", "dose", "double", "dove", "draft", "dragon", "drama", "drastic", "draw", "dream", "dress", "drift", "drill", "drink", "drip", "drive", "drop", "drum", "dry", "duck", "dumb", "dune", "during", "dust", "dutch", "duty", "dwarf", "dynamic", "eager", "eagle", "early", "earn", "earth", "easily", "east", "easy", "echo", "ecology", "economy", "edge", "edit", "educate", "effort", "egg", "eight", "either", "elbow", "elder", "electric", "elegant", "element", "elephant", "elevator", "elite", "else", "embark", "embody", "embrace", "emerge", "emotion", "employ", "empower", "empty", "enable", "enact", "end", "endless", "endorse", "enemy", "energy", "enforce", "engage", "engine", "enhance", "enjoy", "enlist", "enough", "enrich", "enroll", "ensure", "enter", "entire", "entry", "envelope", "episode", "equal", "equip", "era", "erase", "erode", "erosion", "error", "erupt", "escape", "essay", "essence", "estate", "eternal", "ethics", "evidence", "evil", "evoke", "evolve", "exact", "example", "excess", "exchange", "excite", "exclude", "excuse", "execute", "exercise", "exhaust", "exhibit", "exile", "exist", "exit", "exotic", "expand", "expect", "expire", "explain", "expose", "express", "extend", "extra", "eye", "eyebrow", "fabric", "face", "faculty", "fade", "faint", "faith", "fall", "false", "fame", "family", "famous", "fan", "fancy", "fantasy", "farm", "fashion", "fat", "fatal", "father", "fatigue", "fault", "favorite", "feature", "february", "federal", "fee", "feed", "feel", "female", "fence", "festival", "fetch", "fever", "few", "fiber", "fiction", "field", "figure", "file", "film", "filter", "final", "find", "fine", "finger", "finish", "fire", "firm", "first", "fiscal", "fish", "fit", "fitness", "fix", "flag", "flame", "flash", "flat", "flavor", "flee", "flight", "flip", "float", "flock", "floor", "flower", "fluid", "flush", "fly", "foam", "focus", "fog", "foil", "fold", "follow", "food", "foot", "force", "forest", "forget", "fork", "fortune", "forum", "forward", "fossil", "foster", "found", "fox", "fragile", "frame", "frequent", "fresh", "friend", "fringe", "frog", "front", "frost", "frown", "frozen", "fruit", "fuel", "fun", "funny", "furnace", "fury", "future", "gadget", "gain", "galaxy", "gallery", "game", "gap", "garage", "garbage", "garden", "garlic", "garment", "gas", "gasp", "gate", "gather", "gauge", "gaze", "general", "genius", "genre", "gentle", "genuine", "gesture", "ghost", "giant", "gift", "giggle", "ginger", "giraffe", "girl", "give", "glad", "glance", "glare", "glass", "glide", "glimpse", "globe", "gloom", "glory", "glove", "glow", "glue", "goat", "goddess", "gold", "good", "goose", "gorilla", "gospel", "gossip", "govern", "gown", "grab", "grace", "grain", "grant", "grape", "grass", "gravity", "great", "green", "grid", "grief", "grit", "grocery", "group", "grow", "grunt", "guard", "guess", "guide", "guilt", "guitar", "gun", "gym", "habit", "hair", "half", "hammer", "hamster", "hand", "happy", "harbor", "hard", "harsh", "harvest", "hat", "have", "hawk", "hazard", "head", "health", "heart", "heavy", "hedgehog", "height", "hello", "helmet", "help", "hen", "hero", "hidden", "high", "hill", "hint", "hip", "hire", "history", "hobby", "hockey", "hold", "hole", "holiday", "hollow", "home", "honey", "hood", "hope", "horn", "horror", "horse", "hospital", "host", "hotel", "hour", "hover", "hub", "huge", "human", "humble", "humor", "hundred", "hungry", "hunt", "hurdle", "hurry", "hurt", "husband", "hybrid", "ice", "icon", "idea", "identify", "idle", "ignore", "ill", "illegal", "illness", "image", "imitate", "immense", "immune", "impact", "impose", "improve", "impulse", "inch", "include", "income", "increase", "index", "indicate", "indoor", "industry", "infant", "inflict", "inform", "inhale", "inherit", "initial", "inject", "injury", "inmate", "inner", "innocent", "input", "inquiry", "insane", "insect", "inside", "inspire", "install", "intact", "interest", "into", "invest", "invite", "involve", "iron", "island", "isolate", "issue", "item", "ivory", "jacket", "jaguar", "jar", "jazz", "jealous", "jeans", "jelly", "jewel", "job", "join", "joke", "journey", "joy", "judge", "juice", "jump", "jungle", "junior", "junk", "just", "kangaroo", "keen", "keep", "ketchup", "key", "kick", "kid", "kidney", "kind", "kingdom", "kiss", "kit", "kitchen", "kite", "kitten", "kiwi", "knee", "knife", "knock", "know", "lab", "label", "labor", "ladder", "lady", "lake", "lamp", "language", "laptop", "large", "later", "latin", "laugh", "laundry", "lava", "law", "lawn", "lawsuit", "layer", "lazy", "leader", "leaf", "learn", "leave", "lecture", "left", "leg", "legal", "legend", "leisure", "lemon", "lend", "length", "lens", "leopard", "lesson", "letter", "level", "liar", "liberty", "library", "license", "life", "lift", "light", "like", "limb", "limit", "link", "lion", "liquid", "list", "little", "live", "lizard", "load", "loan", "lobster", "local", "lock", "logic", "lonely", "long", "loop", "lottery", "loud", "lounge", "love", "loyal", "lucky", "luggage", "lumber", "lunar", "lunch", "luxury", "lyrics", "machine", "mad", "magic", "magnet", "maid", "mail", "main", "major", "make", "mammal", "man", "manage", "mandate", "mango", "mansion", "manual", "maple", "marble", "march", "margin", "marine", "market", "marriage", "mask", "mass", "master", "match", "material", "math", "matrix", "matter", "maximum", "maze", "meadow", "mean", "measure", "meat", "mechanic", "medal", "media", "melody", "melt", "member", "memory", "mention", "menu", "mercy", "merge", "merit", "merry", "mesh", "message", "metal", "method", "middle", "midnight", "milk", "million", "mimic", "mind", "minimum", "minor", "minute", "miracle", "mirror", "misery", "miss", "mistake", "mix", "mixed", "mixture", "mobile", "model", "modify", "mom", "moment", "monitor", "monkey", "monster", "month", "moon", "moral", "more", "morning", "mosquito", "mother", "motion", "motor", "mountain", "mouse", "move", "movie", "much", "muffin", "mule", "multiply", "muscle", "museum", "mushroom", "music", "must", "mutual", "myself", "mystery", "myth", "naive", "name", "napkin", "narrow", "nasty", "nation", "nature", "near", "neck", "need", "negative", "neglect", "neither", "nephew", "nerve", "nest", "net", "network", "neutral", "never", "news", "next", "nice", "night", "noble", "noise", "nominee", "noodle", "normal", "north", "nose", "notable", "note", "nothing", "notice", "novel", "now", "nuclear", "number", "nurse", "nut", "oak", "obey", "object", "oblige", "obscure", "observe", "obtain", "obvious", "occur", "ocean", "october", "odor", "off", "offer", "office", "often", "oil", "okay", "old", "olive", "olympic", "omit", "once", "one", "onion", "online", "only", "open", "opera", "opinion", "oppose", "option", "orange", "orbit", "orchard", "order", "ordinary", "organ", "orient", "original", "orphan", "ostrich", "other", "outdoor", "outer", "output", "outside", "oval", "oven", "over", "own", "owner", "oxygen", "oyster", "ozone", "pact", "paddle", "page", "pair", "palace", "palm", "panda", "panel", "panic", "panther", "paper", "parade", "parent", "park", "parrot", "party", "pass", "patch", "path", "patient", "patrol", "pattern", "pause", "pave", "payment", "peace", "peanut", "pear", "peasant", "pelican", "pen", "penalty", "pencil", "people", "pepper", "perfect", "permit", "person", "pet", "phone", "photo", "phrase", "physical", "piano", "picnic", "picture", "piece", "pig", "pigeon", "pill", "pilot", "pink", "pioneer", "pipe", "pistol", "pitch", "pizza", "place", "planet", "plastic", "plate", "play", "please", "pledge", "pluck", "plug", "plunge", "poem", "poet", "point", "polar", "pole", "police", "pond", "pony", "pool", "popular", "portion", "position", "possible", "post", "potato", "pottery", "poverty", "powder", "power", "practice", "praise", "predict", "prefer", "prepare", "present", "pretty", "prevent", "price", "pride", "primary", "print", "priority", "prison", "private", "prize", "problem", "process", "produce", "profit", "program", "project", "promote", "proof", "property", "prosper", "protect", "proud", "provide", "public", "pudding", "pull", "pulp", "pulse", "pumpkin", "punch", "pupil", "puppy", "purchase", "purity", "purpose", "purse", "push", "put", "puzzle", "pyramid", "quality", "quantum", "quarter", "question", "quick", "quit", "quiz", "quote", "rabbit", "raccoon", "race", "rack", "radar", "radio", "rail", "rain", "raise", "rally", "ramp", "ranch", "random", "range", "rapid", "rare", "rate", "rather", "raven", "raw", "razor", "ready", "real", "reason", "rebel", "rebuild", "recall", "receive", "recipe", "record", "recycle", "reduce", "reflect", "reform", "refuse", "region", "regret", "regular", "reject", "relax", "release", "relief", "rely", "remain", "remember", "remind", "remove", "render", "renew", "rent", "reopen", "repair", "repeat", "replace", "report", "require", "rescue", "resemble", "resist", "resource", "response", "result", "retire", "retreat", "return", "reunion", "reveal", "review", "reward", "rhythm", "rib", "ribbon", "rice", "rich", "ride", "ridge", "rifle", "right", "rigid", "ring", "riot", "ripple", "risk", "ritual", "rival", "river", "road", "roast", "robot", "robust", "rocket", "romance", "roof", "rookie", "room", "rose", "rotate", "rough", "round", "route", "royal", "rubber", "rude", "rug", "rule", "run", "runway", "rural", "sad", "saddle", "sadness", "safe", "sail", "salad", "salmon", "salon", "salt", "salute", "same", "sample", "sand", "satisfy", "satoshi", "sauce", "sausage", "save", "say", "scale", "scan", "scare", "scatter", "scene", "scheme", "school", "science", "scissors", "scorpion", "scout", "scrap", "screen", "script", "scrub", "sea", "search", "season", "seat", "second", "secret", "section", "security", "seed", "seek", "segment", "select", "sell", "seminar", "senior", "sense", "sentence", "series", "service", "session", "settle", "setup", "seven", "shadow", "shaft", "shallow", "share", "shed", "shell", "sheriff", "shield", "shift", "shine", "ship", "shiver", "shock", "shoe", "shoot", "shop", "short", "shoulder", "shove", "shrimp", "shrug", "shuffle", "shy", "sibling", "sick", "side", "siege", "sight", "sign", "silent", "silk", "silly", "silver", "similar", "simple", "since", "sing", "siren", "sister", "situate", "six", "size", "skate", "sketch", "ski", "skill", "skin", "skirt", "skull", "slab", "slam", "sleep", "slender", "slice", "slide", "slight", "slim", "slogan", "slot", "slow", "slush", "small", "smart", "smile", "smoke", "smooth", "snack", "snake", "snap", "sniff", "snow", "soap", "soccer", "social", "sock", "soda", "soft", "solar", "soldier", "solid", "solution", "solve", "someone", "song", "soon", "sorry", "sort", "soul", "sound", "soup", "source", "south", "space", "spare", "spatial", "spawn", "speak", "special", "speed", "spell", "spend", "sphere", "spice", "spider", "spike", "spin", "spirit", "split", "spoil", "sponsor", "spoon", "sport", "spot", "spray", "spread", "spring", "spy", "square", "squeeze", "squirrel", "stable", "stadium", "staff", "stage", "stairs", "stamp", "stand", "start", "state", "stay", "steak", "steel", "stem", "step", "stereo", "stick", "still", "sting", "stock", "stomach", "stone", "stool", "story", "stove", "strategy", "street", "strike", "strong", "struggle", "student", "stuff", "stumble", "style", "subject", "submit", "subway", "success", "such", "sudden", "suffer", "sugar", "suggest", "suit", "summer", "sun", "sunny", "sunset", "super", "supply", "supreme", "sure", "surface", "surge", "surprise", "surround", "survey", "suspect", "sustain", "swallow", "swamp", "swap", "swarm", "swear", "sweet", "swift", "swim", "swing", "switch", "sword", "symbol", "symptom", "syrup", "system", "table", "tackle", "tag", "tail", "talent", "talk", "tank", "tape", "target", "task", "taste", "tattoo", "taxi", "teach", "team", "tell", "ten", "tenant", "tennis", "tent", "term", "test", "text", "thank", "that", "theme", "then", "theory", "there", "they", "thing", "this", "thought", "three", "thrive", "throw", "thumb", "thunder", "ticket", "tide", "tiger", "tilt", "timber", "time", "tiny", "tip", "tired", "tissue", "title", "toast", "tobacco", "today", "toddler", "toe", "together", "toilet", "token", "tomato", "tomorrow", "tone", "tongue", "tonight", "tool", "tooth", "top", "topic", "topple", "torch", "tornado", "tortoise", "toss", "total", "tourist", "toward", "tower", "town", "toy", "track", "trade", "traffic", "tragic", "train", "transfer", "trap", "trash", "travel", "tray", "treat", "tree", "trend", "trial", "tribe", "trick", "trigger", "trim", "trip", "trophy", "trouble", "truck", "true", "truly", "trumpet", "trust", "truth", "try", "tube", "tuition", "tumble", "tuna", "tunnel", "turkey", "turn", "turtle", "twelve", "twenty", "twice", "twin", "twist", "two", "type", "typical", "ugly", "umbrella", "unable", "unaware", "uncle", "uncover", "under", "undo", "unfair", "unfold", "unhappy", "uniform", "unique", "unit", "universe", "unknown", "unlock", "until", "unusual", "unveil", "update", "upgrade", "uphold", "upon", "upper", "upset", "urban", "urge", "usage", "use", "used", "useful", "useless", "usual", "utility", "vacant", "vacuum", "vague", "valid", "valley", "valve", "van", "vanish", "vapor", "various", "vast", "vault", "vehicle", "velvet", "vendor", "venture", "venue", "verb", "verify", "version", "very", "vessel", "veteran", "viable", "vibrant", "vicious", "victory", "video", "view", "village", "vintage", "violin", "virtual", "virus", "visa", "visit", "visual", "vital", "vivid", "vocal", "voice", "void", "volcano", "volume", "vote", "voyage", "wage", "wagon", "wait", "walk", "wall", "walnut", "want", "warfare", "warm", "warrior", "wash", "wasp", "waste", "water", "wave", "way", "wealth", "weapon", "wear", "weasel", "weather", "web", "wedding", "weekend", "weird", "welcome", "west", "wet", "whale", "what", "wheat", "wheel", "when", "where", "whip", "whisper", "wide", "width", "wife", "wild", "will", "win", "window", "wine", "wing", "wink", "winner", "winter", "wire", "wisdom", "wise", "wish", "witness", "wolf", "woman", "wonder", "wood", "wool", "word", "work", "world", "worry", "worth", "wrap", "wreck", "wrestle", "wrist", "write", "wrong", "yard", "year", "yellow", "you", "young", "youth", "zebra", "zero", "zone", "zoo"];
+// ============================================================
+// UQ BORB Wallet — crypto 100% locale, zéro dépendance externe.
+// PBKDF2/SHA-512/SHA-256 : WebCrypto · Ed25519 : TweetNaCl
+// QR : qrcode-generator · BIP39 : wordlist embarquée.
+// Le seed 24 mots ne quitte JAMAIS cet appareil.
+// ============================================================
+let SESSION=null, WORDLIST=null, TAUX_LIVE=1.0, SOLDE_BORB=0;
+const CDF_PAR_USD=2800, POINTS_PAR_BORB=100;
+const NOEUD_DEFAUT='https://gives-foster-collaboration-pursue.trycloudflare.com';
+const LOCAL=['localhost','127.0.0.1'].includes(location.hostname);
+const API_BASE=new URLSearchParams(location.search).get('api')||(LOCAL?'':NOEUD_DEFAUT);
+const enc=new TextEncoder(), DOMAINE='uq-borb-wallet/ed25519/v1';
+
+function hex(b){return Array.from(b).map(x=>x.toString(16).padStart(2,'0')).join('');}
+async function sha256(d){return new Uint8Array(await crypto.subtle.digest('SHA-256',d instanceof Uint8Array?d:enc.encode(d)));}
+async function sha512(d){return new Uint8Array(await crypto.subtle.digest('SHA-512',d instanceof Uint8Array?d:enc.encode(d)));}
+async function pbkdf2Sha512(p,s,i,l){const k=await crypto.subtle.importKey('raw',enc.encode(p),'PBKDF2',false,['deriveBits']);return new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-512',salt:enc.encode(s),iterations:i},k,l*8));}
+async function chargerWordlist(){if(!WORDLIST)WORDLIST=WORDLIST_DATA;return WORDLIST;}
+function phraseValide(p,wl){const w=p.trim().split(/\s+/);return w.length===24&&w.every(x=>wl.includes(x));}
+async function graineDepuisPhrase(p){return pbkdf2Sha512(p.trim().normalize('NFKD'),'mnemonic',2048,64);}
+async function cleDepuisPhrase(p){const s64=await graineDepuisPhrase(p);const d=enc.encode(DOMAINE);const m=new Uint8Array(d.length+s64.length);m.set(d);m.set(s64,d.length);const h=await sha512(m);const kp=nacl.sign.keyPair.fromSeed(h.slice(0,32));return{seed64:s64,kp,vk:hex(kp.publicKey)};}
+async function genererPhrase(){const wl=await chargerWordlist();const e=crypto.getRandomValues(new Uint8Array(32));const h=await sha256(e);const bits=[];for(const b of e)for(let i=7;i>=0;i--)bits.push((b>>i)&1);for(let i=7;i>=0;i--)bits.push((h[0]>>i)&1);const w=[];for(let i=0;i<24;i++){let x=0;for(let j=0;j<11;j++)x=x*2+bits[i*11+j];w.push(wl[x]);}return w.join(' ');}
+async function empreintePin(pin){let d=await sha256('borb-wallet'+pin);for(let i=0;i<2000;i++)d=await sha256(d);return hex(d);}
+
+const $=id=>document.getElementById(id);
+function err(id,m){$(id).textContent=m||'';}
+function okm(id,m){$(id).textContent=m||'';$(id).style.color='var(--green)';}
+function fermerSheets(){['sheet-send','sheet-recv','sheet-scan','sheet-vw','sheet-swap','sheet-conv','sheet-offline','sheet-binance'].forEach(s=>$(s).classList.add('hidden'));}
+function deconnecter(){SESSION=null;location.reload();}
+function toggleSolde(){const e=$('bal-borb');if(!e.dataset.v)e.dataset.v=e.innerHTML;e.innerHTML=e.innerHTML==='••••'?e.dataset.v:'••••';}
+function toggleSeed(){const p=$('seed-preview');p.classList.toggle('hidden');}
+
+// ---------- NAV ----------
+window.navGo=function(v){
+  ['home','trade','carnet','profile'].forEach(p=>{ $('page-'+p).classList.toggle('on',p===v); $('nav-'+p).classList.toggle('on',p===v); });
+  if(v==='trade') chargerTrade();
+  if(v==='carnet') carnetTab('mes');
+  if(v==='profile') remplirProfil();
+  window.scrollTo({top:0});
+};
+window.ouvrirCarnetSheet=function(){ navGo('carnet'); };
+
+// ---------- VERROU ----------
+window.deverrouiller=async function(){
+  err('lock-err');
+  const uq=$('lock-uq').value.trim(),pin=$('lock-pin').value.trim();
+  if(!uq||!/^\d{4,6}$/.test(pin))return err('lock-err','UQ et PIN 4-6 chiffres requis');
+  try{
+    const h=await empreintePin(pin);const st=localStorage.getItem('borb_pin_'+uq);
+    if(st&&st!==h)return err('lock-err','PIN incorrect');
+    $('lock-uq').value='';$('lock-pin').value='';
+    $('lock-screen').classList.add('hidden');$('screen-auth').classList.remove('hidden');
+    $('in-uq').value=uq;$('in-pin').value='';$('in-pin').focus();
+  }catch(e){err('lock-err','Erreur : '+e.message);}
+};
+window.verrouiller=function(){
+  SESSION=null;
+  ['page-home','page-trade','page-carnet','page-profile'].forEach(p=>$(p).classList.remove('on'));
+  $('page-home').classList.add('on');$('nav-home').classList.add('on');
+  ['nav-trade','nav-carnet','nav-profile'].forEach(n=>$(n).classList.remove('on'));
+  $('screen-dash')&&$('screen-dash').classList.add('hidden');
+  $('screen-auth').classList.remove('hidden');$('hdr-dash').style.display='none';$('bnav').style.display='none';$('statusbar').style.display='none';
+  $('lock-screen').classList.remove('hidden');
+};
+let _inactif=null;
+function armerVerrou(){clearTimeout(_inactif);_inactif=setTimeout(()=>{if(SESSION)verrouiller();},10*60*1000);}
+['click','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,armerVerrou,{passive:true}));
+
+// ---------- THÈME ----------
+const THEMES=['dark','light','hc'];
+window.cycleTheme=function(){
+  const cur=document.documentElement.dataset.theme||'dark';
+  const next=THEMES[(THEMES.indexOf(cur)+1)%THEMES.length];
+  applyTheme(next);localStorage.setItem('uq_theme',next);
+};
+function applyTheme(t){
+  document.documentElement.dataset.theme=t;
+  const use=$('theme-ic').querySelector('use');
+  use.setAttribute('href',t==='dark'?'#i-moon':t==='light'?'#i-sun':'#i-eyeoff');
+}
+(function(){ const t=localStorage.getItem('uq_theme')||'dark'; applyTheme(t); })();
+
+// ---------- MASQUER ----------
+window.toggleMask=function(){ $('mask-screen').classList.toggle('on'); };
+
+// ---------- UQZ ----------
+window.ouvrirUqz=function(){
+  let u=$('uqz-url').value.trim()||localStorage.getItem('uqz_url')||'';
+  if(!u){u=prompt('URL de l\'application UQZ :','http://localhost:8080');if(!u)return;}
+  localStorage.setItem('uqz_url',u);window.open(u,'_blank');
+};
+if($('uqz-url')) $('uqz-url').value=localStorage.getItem('uqz_url')||'';
+
+// ---------- PSEUDO ----------
+function pseudoPour(uq){
+  let p=localStorage.getItem('pseudo_'+uq);
+  if(!p){
+    const noms=['Léopard','Faucon','Panthère','Éléphant','Crocodile','Girafe','Zèbre','Lion','Hippopotame','Rhinocéros','Gazelle','Buffle'];
+    const n=noms[Math.floor(Math.random()*noms.length)];
+    const num=String(uq).replace(/\D/g,'').slice(-4)||Math.floor(Math.random()*9000+1000);
+    p=n+'-'+num;localStorage.setItem('pseudo_'+uq,p);
+  }
+  return '@'+p;
+}
+
+// ---------- APPAREIL / GÉO / HEURE ----------
+function deviceInfo(){
+  const ua=navigator.userAgent;
+  let os='Appareil';
+  if(/Android/i.test(ua))os='Android';else if(/iPhone|iPad/i.test(ua))os='iOS';else if(/Windows/i.test(ua))os='Windows';else if(/Mac/i.test(ua))os='macOS';else if(/Linux/i.test(ua))os='Linux';
+  let br='Navigateur';
+  if(/Edg/i.test(ua))br='Edge';else if(/Chrome/i.test(ua))br='Chrome';else if(/Firefox/i.test(ua))br='Firefox';else if(/Safari/i.test(ua))br='Safari';
+  return os+' · '+br;
+}
+function geoInfo(){
+  if(!navigator.geolocation){ $('sb-geo').textContent='GPS off'; $('pf-geo').textContent='Indisponible'; return; }
+  navigator.geolocation.getCurrentPosition(
+    pos=>{ const g=pos.coords.latitude.toFixed(2)+', '+pos.coords.longitude.toFixed(2); $('sb-geo').textContent='GPS ✓'; $('pf-geo').textContent=g+' (±'+Math.round(pos.coords.accuracy)+'m)'; },
+    ()=>{ $('sb-geo').textContent='GPS off'; $('pf-geo').textContent='Refusé'; },
+    {timeout:8000}
+  );
+}
+
+// ---------- SEED / AUTH ----------
+window.genererSeed=async function(){
+  try{
+    if(typeof nacl==='undefined')return err('auth-err','Crypto non chargée — rechargez');
+    const phrase=await genererPhrase();$('in-seed').value=phrase;
+    $('seed-preview').innerHTML=phrase.split(' ').map((w,i)=>`<span>${i+1}. ${w}</span>`).join('');
+    $('seed-preview').classList.remove('hidden');
+    okm('auth-ok','Phrase générée — notez-la.');
+  }catch(e){err('auth-err','Génération impossible : '+e.message);}
+};
+window.connecter=async function(){
+  err('auth-err');okm('auth-ok');
+  const uq=$('in-uq').value.trim(),phrase=$('in-seed').value.trim(),pin=$('in-pin').value.trim();
+  if(!uq||!phrase||!pin)return err('auth-err','Tous les champs sont requis');
+  if(!/^\d{4,6}$/.test(pin))return err('auth-err','PIN : 4 à 6 chiffres');
+  $('btn-login').innerHTML='<span class="spin"></span>';
+  try{
+    const wl=await chargerWordlist();
+    if(!phraseValide(phrase,wl))return err('auth-err','Phrase invalide — 24 mots BIP39 requis');
+    const{kp,vk}=await cleDepuisPhrase(phrase);const pinHash=await empreintePin(pin);
+    const info=await api('GET','/compte/'+encodeURIComponent(uq));
+    if(!info.existe)return err('auth-err','Compte inexistant — « Créer » ou « hors-ligne »');
+    const st=localStorage.getItem('borb_pin_'+uq);
+    if(st&&st!==pinHash)return err('auth-err','PIN incorrect');
+    if(!st)localStorage.setItem('borb_pin_'+uq,pinHash);
+    SESSION={uq,phrase,kp,vk,pinHash,loginAt:new Date().toISOString()};
+    montrerDash();
+  }catch(e){err('auth-err',e.message||'Erreur réseau');}
+  finally{$('btn-login').textContent='Se connecter';}
+};
+window.creerCompte=async function(){
+  err('auth-err');okm('auth-ok');
+  const uq=$('in-uq').value.trim(),phrase=$('in-seed').value.trim(),pin=$('in-pin').value.trim();
+  if(!uq||!phrase||!pin)return err('auth-err','Tous les champs sont requis');
+  if(!/^\d{4,6}$/.test(pin))return err('auth-err','PIN : 4 à 6 chiffres');
+  $('btn-create').innerHTML='<span class="spin"></span>';
+  try{
+    const wl=await chargerWordlist();
+    if(!phraseValide(phrase,wl))return err('auth-err','Phrase invalide — 24 mots BIP39 requis');
+    const{kp,vk}=await cleDepuisPhrase(phrase);
+    // Le compte BORB est provisionné par UQ à l'inscription —
+    // on vérifie qu'il existe avant de rattacher la clé.
+    const info=await api('GET','/compte/'+encodeURIComponent(uq));
+    if(!info.existe)return err('auth-err','Ce compte UQ n\'a pas de wallet BORB — inscrivez-vous d\'abord sur UQ');
+    const r=await api('POST','/compte/ouvrir',{uq,cle_publique:vk,solde_femto:'0'});
+    if(r.status!=='compte_ouvert')throw new Error(r.message||'Création refusée');
+    const pinHash=await empreintePin(pin);localStorage.setItem('borb_pin_'+uq,pinHash);
+    SESSION={uq,phrase,kp,vk,pinHash,loginAt:new Date().toISOString()};
+    okm('auth-ok','Compte BORB ouvert — en attente de financement');
+    setTimeout(montrerDash,600);
+  }catch(e){err('auth-err',e.message||'Erreur');}
+  finally{$('btn-create').textContent='Créer ce compte BORB';}
+};
+
+// ---------- HORS-LIGNE ----------
+let OFFLINE=null;
+window.ouvrirHorsLigne=function(){fermerSheets();$('sheet-offline').classList.remove('hidden');};
+window.genOffline=async function(){
+  try{
+    const phrase=await genererPhrase();const{vk}=await cleDepuisPhrase(phrase);
+    OFFLINE={phrase,vk};
+    $('offline-out').innerHTML=`<div class="seed-words">${phrase.split(' ').map((w,i)=>`<span>${i+1}. ${w}</span>`).join('')}</div>
+      <div class="kv"><span>Clé publique</span><b style="font-size:10px;word-break:break-all;">${vk}</b></div>
+      <div class="warn-box">Notez ces 24 mots sur papier. Rien n'est enregistré tant que vous ne rattachez pas.</div>`;
+    $('offline-register').classList.remove('hidden');
+  }catch(e){$('offline-out').innerHTML=`<div class="err">${e.message}</div>`;}
+};
+window.registerOffline=async function(){
+  const uq=$('off-uq').value.trim();if(!uq||!OFFLINE)return;
+  try{
+    const r=await api('POST','/compte/ouvrir',{uq,cle_publique:OFFLINE.vk,solde_femto:'0'});
+    if(r.status!=='compte_ouvert')throw new Error(r.message||'Rattachement refusé');
+    $('offline-out').innerHTML+='<div class="okm">✅ Wallet rattaché à '+uq+'.</div>';
+    $('offline-register').classList.add('hidden');
+  }catch(e){$('offline-out').innerHTML+=`<div class="err">${e.message}</div>`;}
+};
+
+// ---------- DASHBOARD ----------
+async function montrerDash(){
+  $('screen-auth').classList.add('hidden');
+  $('hdr-dash').style.display='flex';$('bnav').style.display='flex';$('statusbar').style.display='flex';
+  navGo('home');
+  const pseudo=pseudoPour(SESSION.uq);
+  $('pseudo-tag').textContent=pseudo;$('pf-pseudo').textContent=pseudo;
+  $('pf-ava').textContent=pseudo.replace('@','').charAt(0).toUpperCase();
+  $('addr-uq').textContent=pseudo;
+  $('pf-device').textContent=deviceInfo();$('sb-dev').textContent=deviceInfo().split(' ')[0];
+  $('pf-login').textContent=new Date(SESSION.loginAt).toLocaleString('fr-FR');
+  $('sb-time').textContent=new Date(SESSION.loginAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  geoInfo();
+  await refreshSolde();
+}
+async function refreshSolde(){
+  try{
+    const c=await api('GET','/compte/'+encodeURIComponent(SESSION.uq));
+    const borb=parseFloat(c.solde_borb||0);SOLDE_BORB=borb;
+    $('bal-borb').innerHTML=borb.toLocaleString('fr-FR',{maximumFractionDigits:2})+' <small>BORB</small>';
+    const t=await api('GET','/taux/live');TAUX_LIVE=t.taux_usd||1;
+    $('bal-usd').textContent='≈ '+(borb*TAUX_LIVE).toLocaleString('fr-FR',{maximumFractionDigits:2})+' USD';
+    $('bal-live').textContent='Taux live : '+TAUX_LIVE.toFixed(4)+' USD/BORB';
+  }catch(e){$('bal-borb').textContent='—';}
+}
+function remplirProfil(){
+  if(!SESSION)return;
+  $('pf-uq').textContent=SESSION.uq;$('pf-vk').textContent=SESSION.vk;
+  $('pf-bande').textContent='—';$('pf-activite')&&($('pf-activite').textContent='');
+  api('GET','/compte/'+encodeURIComponent(SESSION.uq)).then(c=>{$('pf-bande').textContent='Bande '+(c.bande??'—');}).catch(()=>{});
+  $('pf-login').textContent=new Date(SESSION.loginAt).toLocaleString('fr-FR');
+  $('pf-device').textContent=deviceInfo();$('pf-theme').textContent=(localStorage.getItem('uq_theme')||'dark');
+}
+
+// ---------- ENVOI (BORB / USD / CDF → BORB réel) ----------
+let SEND_DEV='BORB';
+window.sendSetDev=function(d){
+  SEND_DEV=d;
+  document.querySelectorAll('#send-dev-chips .dev-chip').forEach(c=>c.classList.toggle('on',c.dataset.dev===d));
+  $('send-dev-lb').textContent=d==='BORB'?'BORB':d==='USD'?'USD ($)':'CDF';
+  $('send-amount').value='';sendCalc();
+};
+function montantVersBorb(m,dev){
+  // Renvoie le montant en BORB correspondant à m dans la devise choisie.
+  if(dev==='BORB')return m;
+  const usd=dev==='USD'?m:m/CDF_PAR_USD;
+  return usd/TAUX_LIVE;
+}
+function borbVersDevise(b,dev){
+  if(dev==='BORB')return b;
+  const usd=b*TAUX_LIVE;
+  return dev==='USD'?usd:usd*CDF_PAR_USD;
+}
+function fmtDev(m,dev){
+  if(dev==='BORB')return m.toLocaleString('fr-FR',{maximumFractionDigits:8})+' BORB';
+  if(dev==='USD')return m.toLocaleString('fr-FR',{maximumFractionDigits:2})+' $';
+  return m.toLocaleString('fr-FR',{maximumFractionDigits:0})+' CDF';
+}
+window.sendQuick=function(v){
+  // Montants rapides dans la devise choisie ; Max = solde converti.
+  let m;
+  if(v===-1){ m=borbVersDevise(SOLDE_BORB,SEND_DEV); }
+  else m=v;
+  $('send-amount').value=String(Math.floor(m*100)/100);
+  sendCalc();
+};
+function sendCalc(){
+  const brut=parseFloat(($('send-amount').value||'0').replace(',','.'))||0;
+  const borb=montantVersBorb(brut,SEND_DEV);
+  const f=borbToFemto(String(borb));
+  if(SEND_DEV==='BORB'){
+    $('send-usd').textContent=f?'≈ '+(Number(f)/1e15*TAUX_LIVE).toLocaleString('fr-FR',{maximumFractionDigits:2})+' USD':'—';
+    $('send-conv-lb').textContent='Montant en USD';
+  }else{
+    $('send-usd').textContent=fmtDev(brut,SEND_DEV)+' → '+borb.toLocaleString('fr-FR',{maximumFractionDigits:8})+' BORB';
+    $('send-conv-lb').textContent='Conversion au taux live';
+  }
+  $('send-borb-real').textContent=f?borb.toLocaleString('fr-FR',{maximumFractionDigits:8})+' BORB':'—';
+}
+window.envoyerBorb=async function(){
+  err('send-err');okm('send-ok');
+  const to=$('send-to').value.trim(),raw=$('send-amount').value.trim(),fee=$('send-fee').value.trim()||'0';
+  if(!to||!raw)return err('send-err','Destinataire et montant requis');
+  if(to===SESSION.uq)return err('send-err','Envoi vers vous-même impossible');
+  $('btn-send').innerHTML='<span class="spin"></span>';
+  try{
+    const brut=parseFloat(raw.replace(',','.'));
+    if(!(brut>0))throw new Error('Montant invalide');
+    const borb=montantVersBorb(brut,SEND_DEV);
+    const borbStr=borb.toFixed(8).replace(/0+$/,'').replace(/\.$/,'');
+    const femto=borbToFemto(borbStr),feeFemto=borbToFemto(fee);
+    if(!femto||BigInt(femto)<=0n)throw new Error('Montant invalide');
+    if(SEND_DEV!=='BORB'&&Number(f)/1e15>borb) { /* sanity */ }
+    const prep=await api('POST','/tx/preparer',{from:SESSION.uq,to,montant_femto:femto.toString(),frais_femto:(feeFemto||'0').toString()});
+    if(!prep.tx)throw new Error(prep.message||'Préparation refusée');
+    const sig=nacl.sign.detached(enc.encode(prep.message),SESSION.kp.secretKey);
+    prep.tx.signature=hex(sig);
+    const r=await api('POST','/tx/import',prep.tx);
+    if(r.status!=='appliquee')throw new Error(r.message||'Transaction refusée');
+    // Journal virtuel : on note l'envoi dans la devise saisie.
+    if(SEND_DEV!=='BORB')vwJournal({type:'send',dev:SEND_DEV,montant:brut,borb,motif:'Envoi → '+to,at:Date.now()});
+    okm('send-ok','✅ Envoyé ! '+fmtDev(brut,SEND_DEV)+' ≈ '+borb.toLocaleString('fr-FR',{maximumFractionDigits:4})+' BORB — tx '+prep.tx.borb_id.slice(0,20)+'…');
+    $('send-to').value='';$('send-amount').value='';$('send-fee').value='';
+    await refreshSolde();
+  }catch(e){err('send-err',e.message||'Erreur');}
+  finally{$('btn-send').textContent='Envoyer';}
+};
+function borbToFemto(s){s=s.trim();if(!/^\d+(\.\d{1,15})?$/.test(s))return null;const[i,d='']=s.split('.');const f=(d+'0'.repeat(15)).slice(0,15);return(BigInt(i)*10n**15n+BigInt(f)).toString();}
+if($('send-amount'))$('send-amount').addEventListener('input',sendCalc);
+
+// ---------- RECEVOIR / QR ----------
+window.ouvrirRecevoir=function(){
+  $('recv-uq').textContent=pseudoPour(SESSION.uq)+' ('+SESSION.uq+')';
+  $('sheet-recv').classList.remove('hidden');
+  try{const qr=qrcode(0,'M');qr.addData('UQ-BORB:'+SESSION.uq);qr.make();$('qr-canvas').innerHTML=qr.createImgTag(4,16);}catch(e){$('qr-canvas').innerHTML='<div class="err">QR indisponible</div>';}
+};
+window.copierAddr=function(){navigator.clipboard.writeText(SESSION.uq).then(()=>okm('send-ok','Adresse copiée'));};
+
+// ---------- SCAN ----------
+let scanStream=null;
+window.ouvrirScan=async function(){
+  $('sheet-scan').classList.remove('hidden');$('scan-err').textContent='';
+  if(!('BarcodeDetector' in window)){$('scan-err').textContent='Scan non supporté — saisissez l\'UQ.';return;}
+  try{
+    scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const v=$('scan-video');v.srcObject=scanStream;await v.play();
+    const det=new BarcodeDetector({formats:['qr_code']});
+    const tick=async()=>{
+      if(!$('sheet-scan').classList.contains('hidden')&&v.readyState>=2){
+        try{const codes=await det.detect(v);if(codes.length){let t=(codes[0].rawValue||'').replace(/^UQ-BORB:/,'').trim();if(t){$('send-to').value=t;fermerScan();return;}}}catch(e){}
+      }
+      if(!$('sheet-scan').classList.contains('hidden'))requestAnimationFrame(tick);
+    };tick();
+  }catch(e){$('scan-err').textContent='Caméra refusée : '+e.message;}
+};
+window.fermerScan=function(){$('sheet-scan').classList.add('hidden');if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}};
+
+// ---------- CONVERTIR ----------
+window.ouvrirConvertir=async function(){$('sheet-conv').classList.remove('hidden');try{const t=await api('GET','/taux/live');TAUX_LIVE=t.taux_usd||1;$('cv-taux').textContent=TAUX_LIVE.toFixed(4)+' USD/BORB';}catch(e){}convCalc();};
+function convCalc(){const b=parseFloat(($('cv-borb').value||'0').replace(',','.'))||0;$('cv-usd').textContent=(b*TAUX_LIVE).toLocaleString('fr-FR',{maximumFractionDigits:2})+' $';$('cv-cdf').textContent=(b*TAUX_LIVE*CDF_PAR_USD).toLocaleString('fr-FR',{maximumFractionDigits:0})+' CDF';$('cv-points').textContent=Math.round(b*POINTS_PAR_BORB).toLocaleString('fr-FR')+' pts';}
+
+// ---------- WALLET VIRTUEL USD/CDF (LOCAL uniquement) ----------
+const VW_KEY=()=>'uq_vw_'+(SESSION?SESSION.uq:'anon');
+let VW_DEV='USD';
+function vwLoad(){
+  try{
+    const v=JSON.parse(localStorage.getItem(VW_KEY())||'null');
+    if(v&&typeof v==='object'){
+      // Migration : ancien format {solde,txs} → multi-devises
+      if(v.solde!==undefined&&v.USD===undefined){v.USD=v.solde||0;delete v.solde;}
+      v.USD=v.USD||0;v.CDF=v.CDF||0;v.txs=v.txs||[];
+      return v;
+    }
+  }catch(e){}
+  return{USD:0,CDF:0,txs:[]};
+}
+function vwSave(v){localStorage.setItem(VW_KEY(),JSON.stringify(v));}
+window.vwSetDev=function(d){
+  VW_DEV=d;
+  $('vw-chip-USD').classList.toggle('on',d==='USD');
+  $('vw-chip-CDF').classList.toggle('on',d==='CDF');
+  const v=vwLoad();
+  $('vw-bal').innerHTML=(v[d]||0).toLocaleString('fr-FR',{maximumFractionDigits:2})+' <small>'+d+'</small>';
+  vwRefreshEq();
+};
+function vwRefreshEq(){
+  const v=vwLoad();const m=v[VW_DEV]||0;
+  // équivalent BORB du solde fiat affiché
+  const usd=VW_DEV==='USD'?m:m/CDF_PAR_USD;
+  $('vw-borb-eq').textContent='≈ '+(usd/TAUX_LIVE).toLocaleString('fr-FR',{maximumFractionDigits:4})+' BORB';
+}
+// Journal virtuel : note un mouvement sans toucher aux soldes fiat
+// (les envois réels débitent le BORB on-chain ; le journal fiat est indicatif).
+function vwJournal(ent){
+  const v=vwLoad();
+  if(VW_DEV!==undefined&&ent.dev){v[ent.dev]=Math.max(0,(v[ent.dev]||0)-ent.montant);}
+  v.txs.push(ent);
+  vwSave(v);
+}
+window.ouvrirVW=async function(){
+  try{const t=await api('GET','/taux/live');TAUX_LIVE=t.taux_usd||1;}catch(e){}
+  vwSetDev(VW_DEV);
+  const v=vwLoad();
+  $('vw-log').innerHTML=v.txs.slice(-8).reverse().map(t=>{
+    const lib=t.type==='in'?'Dépôt':t.type==='out'?'Retrait':t.type==='send'?'Envoi':'Conversion';
+    const col=t.type==='in'?'var(--green)':t.type==='out'?'var(--red)':'var(--gold2)';
+    const sign=(t.type==='in'||t.type==='swap-in')?'+':'−';
+    return `<div class="tx-item"><span>${lib} · ${new Date(t.at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}${t.dev?' · '+t.dev:''}</span><b style="color:${col}">${sign}${(t.montant||0).toLocaleString('fr-FR',{maximumFractionDigits:2})}${t.dev?' '+t.dev:''}</b></div>`;
+  }).join('')||'<div style="color:var(--mut);font-size:12px;">Aucun mouvement.</div>';
+  $('sheet-vw').classList.remove('hidden');
+};
+window.vwMove=function(dir){
+  err('vw-err');
+  const m=parseFloat(($('vw-montant').value||'0').replace(',','.'));
+  if(!(m>0))return err('vw-err','Montant invalide');
+  const v=vwLoad();
+  if(dir==='out'&&v[VW_DEV]<m)return err('vw-err','Solde '+VW_DEV+' insuffisant');
+  v[VW_DEV]=dir==='in'?(v[VW_DEV]||0)+m:(v[VW_DEV]||0)-m;
+  v.txs.push({type:dir,dev:VW_DEV,montant:m,at:Date.now()});
+  vwSave(v);$('vw-montant').value='';ouvrirVW();
+};
+
+// ---------- SWAP / CONVERSION ----------
+// Devise 'base' = tout est converti en USD puis vers la cible.
+let SW={from:'USD',to:'BORB'};
+function swTaux(){ // retourne {usdParUnite} pour chaque devise
+  return{USD:1,CDF:1/CDF_PAR_USD,BORB:TAUX_LIVE};
+}
+function swToUsd(m,dev){return m*swTaux()[dev];}
+function swFromUsd(usd,dev){return usd/swTaux()[dev];}
+function swDevNom(d){return d==='BORB'?'BORB':d==='USD'?'USD $':'CDF';}
+window.ouvrirSwap=async function(){
+  try{const t=await api('GET','/taux/live');TAUX_LIVE=t.taux_usd||1;}catch(e){}
+  swPaint();swCalc();
+  $('sheet-swap').classList.remove('hidden');
+};
+function swPaint(){
+  const v=vwLoad();
+  const fSolde=SW.from==='BORB'?SOLDE_BORB:(v[SW.from]||0);
+  $('sw-from-dev').textContent=swDevNom(SW.from)+' · solde '+fSolde.toLocaleString('fr-FR',{maximumFractionDigits:2});
+  $('sw-to-dev').textContent=swDevNom(SW.to);
+  $('sw-taux').textContent='1 BORB = '+TAUX_LIVE.toFixed(4)+' $ · 1 $ = '+CDF_PAR_USD.toLocaleString('fr-FR')+' CDF';
+  $('sw-from-val').textContent=SW.from==='BORB'?fSolde.toLocaleString('fr-FR',{maximumFractionDigits:2}):fSolde.toLocaleString('fr-FR',{maximumFractionDigits:2});
+}
+let SW_PICK=null;
+window.swPicker=function(side){
+  SW_PICK=side;
+  const opts=['USD','CDF','BORB'].map(d=>{
+    const cur=side==='from'?SW.from:SW.to;
+    return `<div class="tx-item" style="cursor:pointer;" onclick="swSetDev('${side}','${d}')"><span>${swDevNom(d)}${d===cur?' ✓':''}</span><span>${d==='BORB'?'solde '+SOLDE_BORB.toLocaleString('fr-FR',{maximumFractionDigits:2}):''}</span></div>`;
+  }).join('');
+  $('sw-err').innerHTML='<div class="info-box" style="margin-top:8px;">Choisir la devise :<br>'+opts+'</div>';
+};
+window.swSetDev=function(side,d){
+  if(side==='from'&&d===SW.to){SW.to=SW.from;}
+  if(side==='to'&&d===SW.from){SW.from=SW.to;}
+  if(side==='from')SW.from=d;else SW.to=d;
+  if(SW.from===SW.to)SW.to=SW.from==='USD'?'CDF':'USD';
+  $('sw-err').textContent='';swPaint();swCalc();
+};
+window.swFlip=function(){const t=SW.from;SW.from=SW.to;SW.to=t;swPaint();swCalc();};
+window.swQuick=function(v){
+  let m;
+  if(v===-1){const vv=vwLoad();m=SW.from==='BORB'?SOLDE_BORB:(vv[SW.from]||0);}
+  else m=v;
+  $('sw-montant').value=String(Math.floor(m*100)/100);swCalc();
+};
+function swCalc(){
+  const brut=parseFloat(($('sw-montant').value||'0').replace(',','.'))||0;
+  const usd=swToUsd(brut,SW.from);
+  const fee=usd*0.001; // 0.1%
+  const net=swFromUsd(usd-fee,SW.to);
+  $('sw-fee').textContent=fmtDev(fee,SW.to==='USD'?'USD':SW.to==='CDF'?'CDF':'BORB');
+  $('sw-receive').textContent=net.toLocaleString('fr-FR',{maximumFractionDigits:SW.to==='BORB'?8:2})+' '+swDevNom(SW.to);
+}
+window.swExec=function(){
+  err('sw-err');okm('sw-ok');
+  const brut=parseFloat(($('sw-montant').value||'0').replace(',','.'))||0;
+  if(!(brut>0))return err('sw-err','Montant invalide');
+  const v=vwLoad();
+  const fSolde=SW.from==='BORB'?SOLDE_BORB:(v[SW.from]||0);
+  if(brut>fSolde)return err('sw-err','Solde '+swDevNom(SW.from)+' insuffisant');
+  if(SW.from==='BORB'||SW.to==='BORB'){
+    // BORB réel : ne bouge pas automatiquement — on guide vers l'envoi/ordre.
+    return err('sw-err','La conversion impliquant du BORB réel passe par « Envoyer » ou le carnet d\'ordre — pas de swap automatique pour l\'instant.');
+  }
+  // fiat ↔ fiat : conversion 100% locale dans le wallet virtuel
+  const usd=swToUsd(brut,SW.from);
+  const fee=usd*0.001;
+  const netUsd=usd-fee;
+  const out=v[SW.from]||0, inV=v[SW.to]||0;
+  v[SW.from]=out-brut;
+  v[SW.to]=inV+swFromUsd(netUsd,SW.to);
+  v.txs.push({type:'swap-out',dev:SW.from,montant:brut,at:Date.now()});
+  v.txs.push({type:'swap-in',dev:SW.to,montant:swFromUsd(netUsd,SW.to),at:Date.now()});
+  vwSave(v);
+  okm('sw-ok','✅ Converti : '+fmtDev(brut,SW.from)+' → '+fmtDev(swFromUsd(netUsd,SW.to),SW.to)+' (frais 0.1%)');
+  $('sw-montant').value='';swCalc();
+};
+
+// ---------- TRADING P2P ----------
+let TRADE_COTE='achat',TRADE_DEV='',TRADE_PAYS='';
+window.navGo&&(window._navGo=navGo);
+window.navGo=function(v){
+  ['home','trade','carnet','profile'].forEach(p=>{ $('page-'+p).classList.toggle('on',p===v); $('nav-'+p).classList.toggle('on',p===v); });
+  if(v==='trade') chargerTrade();
+  if(v==='carnet') carnetTab('mes');
+  if(v==='profile') remplirProfil();
+  window.scrollTo({top:0});
+};
+window.tradeFiltre=function(c){
+  TRADE_COTE=c;
+  $('tk-achat').className=c==='achat'?'tab buy on':'tab buy';
+  $('tk-vente').className=c==='vente'?'tab sell on':'tab sell';
+  chargerTrade();
+};
+async function chargerTrade(){
+  try{
+    const d=$('tf-devise').value,p=$('tf-pays').value;
+    // cote côté OFFRE : si je veux acheter → je cherche les "vente" ; si vendre → "achat"
+    const coteOpp=TRADE_COTE==='achat'?'vente':'achat';
+    let q='cote='+coteOpp;if(d)q+='&devise='+d;if(p)q+='&pays='+p;
+    const r=await api('GET','/ordres?'+q);
+    $('trade-list').innerHTML=r.ordres.length?r.ordres.map(o=>carteMarche(o)).join(''):'<div style="color:var(--mut);font-size:12px;margin-top:8px;">Aucune offre — publiez la vôtre.</div>';
+    const m=await api('GET','/ordres?uq='+encodeURIComponent(SESSION.uq));
+    const actifs=m.ordres.filter(o=>o.statut==='en_attente');
+    $('trade-mes').innerHTML=actifs.length?actifs.map(o=>carteOrdre(o,true)).join(''):'<div style="color:var(--mut);font-size:12px;">Aucun ordre en cours.</div>';
+  }catch(e){$('trade-list').innerHTML='<div class="err">Marché indisponible</div>';}
+}
+function carteMarche(o){
+  const pn=(PAYS.find(p=>p[0]===o.pays)||[o.pays,o.pays])[1];
+  const side=o.cote==='vente'?'sell':'buy';
+  const label=o.cote==='vente'?'Vendeur vend':'Acheteur achète';
+  return `<div class="market-item"><div class="mi-top"><span class="mi-side ${side}">${label}</span><span class="oid" style="font-family:monospace;font-size:11px;color:var(--gold2);">${o.id}</span></div>
+    <div class="mi-amount">${fmtBorb(o.montant_femto)} BORB</div>
+    <div class="mi-meta">${fmtEspeces(o)} · ${pn}</div>
+    <div class="mi-rate">Taux figé : ${(o.taux_fige_micro/1e6).toFixed(4)} USD/BORB · expire ${new Date(o.expire_at*1000).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div>
+    <button class="take-btn ${TRADE_COTE==='achat'?'buy':'sell'}" onclick="prendreOrdre('${o.id}')">${TRADE_COTE==='achat'?'Acheter':'Vendre'} — prendre l'offre</button></div>`;
+}
+window.prendreOrdre=async function(id){
+  const code=prompt('Code temporaire de l\'ordre (demandez-le au partenaire) :');
+  if(!code)return;
+  const agent=prompt('Votre identifiant UQ (agent) :',SESSION.uq);
+  if(!agent)return;
+  try{
+    const r=await api('POST','/ordre/pourvoir',{ordre_id:id,code:code.trim(),agent_uq:agent.trim()});
+    if(r.status!=='pourvu')throw new Error(r.message||'Pourvoi refusé');
+    alert('✅ Ordre réglé — BORB transférés.');chargerTrade();
+  }catch(e){alert(e.message||'Erreur');}
+};
+
+// ---------- CARNET (page) ----------
+const PAYS=[["DZ","Algérie"],["AO","Angola"],["BJ","Bénin"],["BW","Botswana"],["BF","Burkina Faso"],["BI","Burundi"],["CV","Cap-Vert"],["CM","Cameroun"],["CF","Centrafrique"],["TD","Tchad"],["KM","Comores"],["CG","Congo"],["CD","RD Congo"],["CI","Côte d'Ivoire"],["DJ","Djibouti"],["EG","Égypte"],["GQ","Guinée équatoriale"],["ER","Érythrée"],["SZ","Eswatini"],["ET","Éthiopie"],["GA","Gabon"],["GM","Gambie"],["GH","Ghana"],["GN","Guinée"],["GW","Guinée-Bissau"],["KE","Kenya"],["LS","Lesotho"],["LR","Libéria"],["LY","Libye"],["MG","Madagascar"],["MW","Malawi"],["ML","Mali"],["MR","Mauritanie"],["MU","Maurice"],["MA","Maroc"],["MZ","Mozambique"],["NA","Namibie"],["NE","Niger"],["NG","Nigeria"],["RW","Rwanda"],["ST","Sao Tomé"],["SN","Sénégal"],["SC","Seychelles"],["SL","Sierra Leone"],["SO","Somalie"],["ZA","Afrique du Sud"],["SS","Soudan du Sud"],["SD","Soudan"],["TZ","Tanzanie"],["TG","Togo"],["TN","Tunisie"],["UG","Ouganda"],["ZM","Zambie"],["ZW","Zimbabwe"]];
+let COTE_ORDRE='vente';
+function remplirPays(id){const s=$(id);s.innerHTML=PAYS.map(p=>`<option value="${p[0]}">${p[1]} (${p[0]})</option>`).join('');}
+function remplirPaysFiltres(){const p=$('tf-pays');if(p.options.length<=1)p.innerHTML='<option value="">Tous pays</option>'+PAYS.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');const q=$('pub-pays');if(q.options.length<=1)q.innerHTML='<option value="">Tous pays</option>'+PAYS.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('');}
+function carnetTab(t){
+  $('ct-mes').className=t==='mes'?'tab on buy':'tab';$('ct-public').className=t==='public'?'tab on':'tab';
+  if(t==='public'){$('carnet-mes').classList.add('hidden');$('carnet-public').classList.remove('hidden');chargerCarnet();}
+  else{$('carnet-public').classList.add('hidden');$('carnet-mes').classList.remove('hidden');chargerMesOrdres();}
+}
+function toggleFormOrdre(){$('form-ordre').classList.toggle('hidden');}
+function setCote(c){COTE_ORDRE=c;$('cote-vente').className=c==='vente'?'tab on sell':'tab buy';$('cote-achat').className=c==='achat'?'tab on buy':'tab sell';}
+function fmtBorb(f){return(Number(f)/1e15).toLocaleString('fr-FR',{maximumFractionDigits:6});}
+function fmtEspeces(o){return o.devise==='USD'?(o.montant_especes/100).toLocaleString('fr-FR',{minimumFractionDigits:2})+' USD':o.montant_especes.toLocaleString('fr-FR')+' CDF';}
+function carteOrdre(o,mien){
+  const pn=(PAYS.find(p=>p[0]===o.pays)||[o.pays,o.pays])[1];
+  let h=`<div class="ordre-card"><div class="oh"><span class="oid">${o.id}</span><span class="statut ${o.statut}">${o.statut}</span></div>`;
+  h+=`<div class="om">${fmtBorb(o.montant_femto)} BORB <small>↔ ${fmtEspeces(o)}</small></div>`;
+  h+=`<div class="ometa">${o.cote==='vente'?'Vente':'Achat'} · ${pn} · taux figé ${(o.taux_fige_micro/1e6).toFixed(4)} USD</div>`;
+  if(o.statut==='en_attente'){h+=`<div class="ocode">${o.code}</div><div class="ometa">Code temporaire — à communiquer à l'agent.</div>`;}
+  if(mien&&o.statut==='en_attente'){h+=`<button class="mini-btn red" onclick="annulerOrdre('${o.id}')">Annuler l'ordre</button>`;}
+  return h+'</div>';
+}
+async function chargerMesOrdres(){
+  try{const r=await api('GET','/ordres?uq='+encodeURIComponent(SESSION.uq));
+    $('mes-ordres').innerHTML=r.ordres.length?r.ordres.map(o=>carteOrdre(o,true)).join(''):'<div style="color:var(--mut);font-size:13px;margin-top:10px;">Aucun ordre.</div>';
+  }catch(e){$('mes-ordres').innerHTML='<div class="err">Carnet indisponible</div>';}
+}
+async function chargerCarnet(){
+  try{const c=$('pub-cote').value,p=$('pub-pays').value;let q='';if(c)q+='&cote='+c;if(p)q+='&pays='+p;
+    const r=await api('GET','/ordres?'+q.slice(1));
+    $('pub-ordres').innerHTML=r.ordres.length?r.ordres.map(o=>carteOrdre(o,false)).join(''):'<div style="color:var(--mut);font-size:13px;margin-top:10px;">Carnet vide.</div>';
+  }catch(e){$('pub-ordres').innerHTML='<div class="err">Carnet indisponible</div>';}
+}
+window.creerOrdre=async function(){
+  err('ordre-err');okm('ordre-ok');
+  const borb=$('ord-borb').value.trim(),especes=$('ord-especes').value.trim(),devise=$('ord-devise').value,pays=$('ord-pays').value;
+  if(!borb||!especes)return err('ordre-err','Montants requis');
+  const femto=borbToFemto(borb);if(!femto||BigInt(femto)<=0n)return err('ordre-err','Montant BORB invalide');
+  let especesN;
+  if(devise==='USD'){if(!/^\d+(\.\d{1,2})?$/.test(especes))return err('ordre-err','USD invalide (ex: 50.00)');especesN=Math.round(parseFloat(especes)*100);}
+  else{if(!/^\d+$/.test(especes))return err('ordre-err','CDF invalide (francs)');especesN=parseInt(especes,10);}
+  $('btn-ordre').innerHTML='<span class="spin"></span>';
+  try{
+    const r=await api('POST','/ordres',{uq:SESSION.uq,cote:COTE_ORDRE,montant_femto:femto.toString(),montant_especes:especesN.toString(),devise,pays});
+    if(r.status!=='ordre_cree')throw new Error(r.message||'Création refusée');
+    okm('ordre-ok','✅ Ordre '+r.ordre.id+' — code : '+r.ordre.code);
+    $('ord-borb').value='';$('ord-especes').value='';chargerMesOrdres();chargerTrade();
+  }catch(e){err('ordre-err',e.message||'Erreur');}
+  finally{$('btn-ordre').textContent='Publier l\'ordre';}
+};
+window.pourvoirOrdre=async function(){
+  err('ag-err');okm('ag-ok');
+  const id=$('ag-id').value.trim(),code=$('ag-code').value.trim(),agent=$('ag-uq').value.trim();
+  if(!id||!/^\d{6}$/.test(code)||!agent)return err('ag-err','ORD-id, code 6 chiffres et UQ requis');
+  $('ag-ok').textContent='Règlement…';$('ag-ok').style.color='var(--mut)';
+  try{
+    const r=await api('POST','/ordre/pourvoir',{ordre_id:id,code,agent_uq:agent});
+    if(r.status!=='pourvu')throw new Error(r.message||'Pourvoi refusé');
+    okm('ag-ok','✅ Ordre '+id+' réglé.');
+    $('ag-id').value='';$('ag-code').value='';chargerCarnet();chargerMesOrdres();chargerTrade();
+  }catch(e){err('ag-err',e.message||'Erreur');$('ag-ok').textContent='';}
+};
+window.annulerOrdre=async function(id){
+  if(!confirm('Annuler ? Les BORB bloqués seront remboursés.'))return;
+  try{const r=await api('POST','/ordre/annuler',{ordre_id:id,uq:SESSION.uq});if(r.status!=='annule')throw new Error(r.message);chargerMesOrdres();chargerTrade();}catch(e){alert(e.message||'Erreur');}
+};
+
+// ---------- BINANCE (clés 100% locales, signature HMAC dans le navigateur) ----------
+const BN_KEY_STORE='binance_keys_local';
+function bnKeys(){ try{return JSON.parse(localStorage.getItem(BN_KEY_STORE)||'null');}catch(e){return null;} }
+function bnSaveKeys(k,s){ localStorage.setItem(BN_KEY_STORE, JSON.stringify({key:k,secret:s})); }
+function bnClearKeys(){ localStorage.removeItem(BN_KEY_STORE); }
+async function bnSign(query){
+  const keys=bnKeys(); if(!keys) throw new Error('Non connecté');
+  const ts=Date.now();
+  const payload=query?query+'&timestamp='+ts:'timestamp='+ts;
+  const key=await crypto.subtle.importKey('raw',enc.encode(keys.secret),'HMAC',{name:'HMAC',hash:'SHA-256'},false,['sign']);
+  const sig=await crypto.subtle.sign('HMAC',key,enc.encode(payload));
+  return payload+'&signature='+hex(sig);
+}
+async function bnGet(path, signed){
+  const keys=bnKeys();
+  const url='https://api.binance.com'+path+(signed?'?'+await bnSign(''):'');
+  const r=await fetch(url,{headers:{'X-MBX-APIKEY':keys.key}});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.msg||('Binance HTTP '+r.status));
+  return j;
+}
+window.ouvrirBinance=function(){
+  const k=bnKeys();
+  if(k){
+    $('bn-not-connected').classList.add('hidden');$('bn-connected').classList.remove('hidden');
+    $('bn-key-show').textContent=k.key.slice(0,8)+'…'+k.key.slice(-4);
+    bnSoldes();
+  } else {
+    $('bn-not-connected').classList.remove('hidden');$('bn-connected').classList.add('hidden');
+  }
+  $('sheet-binance').classList.remove('hidden');
+};
+window.bnConnecter=async function(){
+  err('bn-err');
+  const k=$('bn-key').value.trim(),s=$('bn-secret').value.trim();
+  if(!k||!s)return err('bn-err','API Key et Secret requis');
+  bnSaveKeys(k,s);
+  try{ await bnGet('/api/v3/account',true); }catch(e){ bnClearKeys(); return err('bn-err','Clés refusées : '+e.message); }
+  $('bn-not-connected').classList.add('hidden');$('bn-connected').classList.remove('hidden');
+  $('bn-key-show').textContent=k.slice(0,8)+'…'+k.slice(-4);
+};
+window.bnDeconnecter=function(){bnClearKeys();$('bn-connected').classList.add('hidden');$('bn-not-connected').classList.remove('hidden');$('bn-result').innerHTML='';};
+window.bnSoldes=async function(){
+  $('bn-result').innerHTML='<div style="color:var(--mut);font-size:12px;margin-top:10px;"><span class="spin"></span> Chargement…</div>';
+  try{
+    const acc=await bnGet('/api/v3/account',true);
+    const rows=(acc.balances||[]).filter(b=>parseFloat(b.free)>0||parseFloat(b.locked)>0);
+    $('bn-result').innerHTML=rows.length?rows.map(b=>`<div class="kv"><span>${b.asset}</span><b>${parseFloat(b.free).toPrecision(8)} libre${parseFloat(b.locked)>0?' · '+parseFloat(b.locked).toPrecision(8)+' verrouillé':''}</b></div>`).join(''):'<div style="color:var(--mut);font-size:12px;margin-top:10px;">Aucun solde spot.</div>';
+  }catch(e){$('bn-result').innerHTML=`<div class="err">${e.message}</div>`;}
+};
+window.bnDepot=async function(){
+  $('bn-result').innerHTML='<div style="color:var(--mut);font-size:12px;margin-top:10px;"><span class="spin"></span> Recherche…</div>';
+  try{
+    // Adresse de dépôt USDT — endpoint spot crypto deposit (permission required)
+    const q='coin=USDT&network=TRC20';
+    const ts=Date.now();
+    const payload=q+'&timestamp='+ts;
+    const key=await crypto.subtle.importKey('raw',enc.encode(bnKeys().secret),'HMAC',{name:'HMAC',hash:'SHA-256'},false,['sign']);
+    const sig=await crypto.subtle.sign('HMAC',key,enc.encode(payload));
+    const r=await fetch('https://api.binance.com/sapi/v1/capital/deposit/address?'+payload+'&signature='+hex(sig),{headers:{'X-MBX-APIKEY':bnKeys().key}});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(j.msg||('HTTP '+r.status));
+    $('bn-result').innerHTML=`<div class="kv"><span>USDT · TRC20</span><b style="font-size:10px;word-break:break-all;">${j.address||'—'}</b></div>${j.tag?`<div class="kv"><span>Tag/Memo</span><b>${j.tag}</b></div>`:''}<div class="info-box" style="margin-top:8px;">⚠️ Vérifiez le réseau — un dépôt sur le mauvais réseau est perdu.</div>`;
+  }catch(e){
+    // Fallback : P2P public — prix de référence sans clé
+    try{
+      const r2=await fetch('https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fiat:'USD',page:1,rows:1,tradeType:'SELL',asset:'USDT',countries:[],proMerchantAds:false})});
+      const j2=await r2.json();
+      const price=j2&&j2.data&&j2.data[0]&&j2.data[0].adv&&j2.data[0].adv.price;
+      $('bn-result').innerHTML=`<div class="err">Dépôt auto indisponible (${e.message}).<br>Prix P2P USDT : <b>${price?price+' USD':'—'}</b> — utilisez l'app Binance pour déposer.</div>`;
+    }catch(e2){$('bn-result').innerHTML=`<div class="err">${e.message}</div>`;}
+  }
+};
+
+// ---------- API ----------
+async function api(method,path,body){
+  const opt={method,headers:{'Content-Type':'application/json'}};
+  if(body)opt.body=JSON.stringify(body);
+  const r=await fetch(API_BASE+path,opt);
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){const e=new Error(j.message||('HTTP '+r.status));e.data=j;throw e;}
+  return j;
+}
+
+// ---------- PWA ----------
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
+
+// ---------- INIT ----------
+(function(){
+  remplirPays('ord-pays');remplirPaysFiltres();
+  // Pré-sélection du pseudo si session restaurée (non — session en mémoire)
+})();
+</script>
+</body>
+</html>
