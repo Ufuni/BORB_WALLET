@@ -349,7 +349,7 @@
         </div>
         <button class="btn btn-gold" onclick="deverrouiller()"><svg class="ic"><use href="#i-lock"/></svg> Déverrouiller</button>
         <div class="err" id="lock-err"></div>
-        <div class="access-foot">Première visite ? <a onclick="showAuth()">Connecter le wallet</a></div>
+        <div class="access-foot">Première visite ? Entrez votre UQ et <b>choisissez un PIN</b> — la phrase 24 mots vous sera demandée ensuite.</div>
       </div>
     </div>
   </div>
@@ -363,24 +363,17 @@
           <h1>UQ <span>BORB</span></h1>
           <small>WALLET · RÉSEAU BORB · AFRIQUE</small>
         </div>
-        <h2>Connexion wallet</h2>
-        <p class="sub">Votre compte UQ + phrase de sécurité 24 mots + code PIN.</p>
-        <label>Identifiant UQ</label>
-        <input id="in-uq" placeholder="UQ-230354360" autocomplete="username" autocapitalize="characters">
-        <label>Phrase de sécurité — 24 mots</label>
+        <h2>Phrase de sécurité</h2>
+        <p class="sub" id="auth-uq-sub">Collez vos 24 mots — ou générez-en une nouvelle. <b>Notez-la</b> : elle permet de récupérer votre compte.</p>
+        <label>Phrase — 24 mots</label>
         <textarea id="in-seed" placeholder="mot1 mot2 mot3 … mot24" autocomplete="off" oninput="seedCount()"></textarea>
         <div class="wordcount" id="seed-count">0 / 24 mots</div>
         <button class="seed-toggle" onclick="toggleSeed()">👁 24 mots — toucher pour afficher/masquer</button>
         <div id="seed-preview" class="seed-words hidden"></div>
-        <div class="divider">CODE PIN</div>
-        <div class="gen-row">
-          <div class="pin-wrap" style="flex:1;">
-            <input id="in-pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="current-password">
-            <button class="pin-eye" onclick="togglePin('in-pin',this)">👁</button>
-          </div>
-          <button class="gen-btn" onclick="genererSeed()" title="Générer une phrase">🎲</button>
+        <div class="gen-row" style="margin-top:14px;">
+          <button class="gen-btn" onclick="genererSeed()" title="Générer une phrase" style="width:100%;padding:12px;font-size:13px;">🎲 Générer une phrase 24 mots</button>
         </div>
-        <button class="btn btn-gold" id="btn-login" onclick="connecter()"><svg class="ic"><use href="#i-lock"/></svg> Se connecter</button>
+        <button class="btn btn-gold" id="btn-login" onclick="connecter()"><svg class="ic"><use href="#i-lock"/></svg> Connecter</button>
         <button class="btn btn-ghost" id="btn-create" onclick="creerCompte()">Créer ce compte BORB</button>
         <div class="err" id="auth-err"></div>
         <div class="okm" id="auth-ok"></div>
@@ -841,6 +834,8 @@ window.showAuth=function(){$('lock-screen').classList.add('hidden');$('screen-au
 window.showLock=function(){$('screen-auth').classList.add('hidden');$('lock-screen').classList.remove('hidden');};
 window.togglePin=function(id,btn){const i=$(id);const show=i.type==='password';i.type=show?'text':'password';btn.textContent=show?'🙈':'👁';};
 window.seedCount=function(){const n=($('in-seed').value.trim().split(/\s+/).filter(Boolean)).length;const c=$('seed-count');if(c){c.textContent=n+' / 24 mots';c.classList.toggle('ok',n===24);}};
+// UQ + PIN saisis à l'écran 1, repris à l'écran 2
+let _uqAttente='',_pinAttente='';
 window.deverrouiller=async function(){
   err('lock-err');
   const uq=$('lock-uq').value.trim(),pin=$('lock-pin').value.trim();
@@ -848,9 +843,12 @@ window.deverrouiller=async function(){
   try{
     const h=await empreintePin(pin);const st=localStorage.getItem('borb_pin_'+uq);
     if(st&&st!==h)return err('lock-err','PIN incorrect');
+    _uqAttente=uq;_pinAttente=pin;
     $('lock-uq').value='';$('lock-pin').value='';
     $('lock-screen').classList.add('hidden');$('screen-auth').classList.remove('hidden');
-    $('in-uq').value=uq;$('in-pin').value='';$('in-pin').focus();
+    const sub=$('auth-uq-sub');if(sub)sub.innerHTML='Compte <b>'+uq+'</b> — collez vos 24 mots ou générez-en une nouvelle. <b>Notez-la</b> : elle permet de récupérer votre compte.';
+    $('in-seed').value='';$('seed-preview').classList.add('hidden');seedCount();
+    $('in-seed').focus();
   }catch(e){err('lock-err','Erreur : '+e.message);}
 };
 window.verrouiller=function(){
@@ -933,8 +931,8 @@ window.genererSeed=async function(){
 };
 window.connecter=async function(){
   err('auth-err');okm('auth-ok');
-  const uq=$('in-uq').value.trim(),phrase=$('in-seed').value.trim(),pin=$('in-pin').value.trim();
-  if(!uq||!phrase||!pin)return err('auth-err','Tous les champs sont requis');
+  const uq=_uqAttente,phrase=$('in-seed').value.trim(),pin=_pinAttente;
+  if(!uq||!phrase||!pin)return err('auth-err','UQ ou PIN manquant — retour au verrou');
   if(!/^\d{4,6}$/.test(pin))return err('auth-err','PIN : 4 à 6 chiffres');
   $('btn-login').innerHTML='<span class="spin"></span>';
   try{
@@ -948,6 +946,7 @@ window.connecter=async function(){
     if(!st)localStorage.setItem('borb_pin_'+uq,pinHash);
     SESSION={uq,phrase,kp,vk,pinHash,loginAt:new Date().toISOString()};
     montrerDash();
+    toast('Connecté — notez vos 24 mots (menu → Phrase de sécurité)');
   }catch(e){
     const msg=e.message||'Erreur réseau';
     err('auth-err','Échec à l\'étape : '+msg+' — vérifiez votre connexion au nœud.');
@@ -956,8 +955,8 @@ window.connecter=async function(){
 };
 window.creerCompte=async function(){
   err('auth-err');okm('auth-ok');
-  const uq=$('in-uq').value.trim(),phrase=$('in-seed').value.trim(),pin=$('in-pin').value.trim();
-  if(!uq||!phrase||!pin)return err('auth-err','Tous les champs sont requis');
+  const uq=_uqAttente,phrase=$('in-seed').value.trim(),pin=_pinAttente;
+  if(!uq||!phrase||!pin)return err('auth-err','UQ ou PIN manquant — retour au verrou');
   if(!/^\d{4,6}$/.test(pin))return err('auth-err','PIN : 4 à 6 chiffres');
   $('btn-create').innerHTML='<span class="spin"></span>';
   try{
