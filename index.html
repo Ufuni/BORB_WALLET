@@ -233,6 +233,16 @@
   .quick-chip { flex:1;text-align:center;padding:8px 4px;border-radius:10px;background:var(--bg2);border:1px solid var(--line);font-size:12px;font-weight:700;cursor:pointer;color:var(--mut); }
   .quick-chip:active { border-color:var(--gold);color:var(--gold2); }
 
+  /* ===== MENU ===== */
+  .menu-list { margin:10px 0 6px; }
+  .menu-item { display:flex;align-items:center;gap:14px;padding:13px 10px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:12px; }
+  .menu-item:active { background:var(--bg2); }
+  .menu-item .ic { width:40px;height:40px;border-radius:12px;background:var(--bg2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--gold);flex-shrink:0; }
+  .menu-item .ic .ic-svg { width:20px;height:20px; }
+  .menu-item b { display:block;font-size:13px; }
+  .menu-item small { color:var(--mut);font-size:11px; }
+  .menu-item .chev { margin-left:auto;color:var(--mut);font-size:20px; }
+
   /* ===== SEED compact ===== */
   .seed-toggle { width:100%;background:var(--bg2);border:1px dashed var(--line);border-radius:12px;padding:12px;font-size:12px;color:var(--mut);cursor:pointer;text-align:center;margin-top:10px; }
   .seed-words { display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:14px;max-height:150px;overflow-y:auto; }
@@ -273,6 +283,9 @@
     <symbol id="i-copy" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></symbol>
     <symbol id="i-back" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></symbol>
     <symbol id="i-key" viewBox="0 0 24 24"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3z"/></symbol>
+    <symbol id="i-ext" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></symbol>
   </defs>
 </svg>
 
@@ -285,6 +298,7 @@
       <div><h1>UQ <span>BORB</span></h1><small id="hdr-sub">WALLET · AFRIQUE</small></div>
     </div>
     <div class="tools">
+      <button class="tbtn" id="btn-menu" title="Menu" onclick="ouvrirMenu()"><svg class="ic-svg"><use href="#i-menu"/></svg></button>
       <button class="tbtn" id="btn-theme" title="Thème" onclick="cycleTheme()"><svg class="ic-svg" id="theme-ic"><use href="#i-moon"/></svg></button>
       <button class="tbtn" id="btn-mask" title="Masquer" onclick="toggleMask()"><svg class="ic-svg"><use href="#i-mask"/></svg></button>
       <div class="net">Live</div>
@@ -493,6 +507,43 @@
     </div>
   </div>
 
+  <!-- ===== PAGE : P2P SIMPLE ===== -->
+  <div id="page-p2p" class="page">
+    <div class="back-b" onclick="navGo('home')"><svg class="ic-svg"><use href="#i-back"/></svg></div>
+    <div class="card" style="margin-top:14px;">
+      <div class="card-h"><span class="card-t">P2P simple</span><span class="net">Pair à pair</span></div>
+      <h2 style="font-size:20px;">Envoyer à un UQ</h2>
+      <p style="color:var(--mut);font-size:12px;margin-top:4px;">Direct, sans intermédiaire — signé par votre clé 24 mots.</p>
+      <label>Destinataire</label>
+      <div class="row">
+        <input id="p2p-to" placeholder="UQ-00000002" style="flex:2;" autocomplete="off">
+        <button class="mini-btn" style="flex:1;margin-top:0;" onclick="ouvrirScanP2P()">📷</button>
+      </div>
+      <div class="dev-chips" id="p2p-dev-chips">
+        <div class="dev-chip on" data-dev="BORB" onclick="p2pSetDev('BORB')">BORB</div>
+        <div class="dev-chip" data-dev="USD" onclick="p2pSetDev('USD')">USD $</div>
+        <div class="dev-chip" data-dev="CDF" onclick="p2pSetDev('CDF')">CDF</div>
+      </div>
+      <label>Montant (<span id="p2p-dev-lb">BORB</span>)</label>
+      <input id="p2p-amount" type="text" inputmode="decimal" placeholder="0.00" oninput="p2pCalc()">
+      <div class="quick-row">
+        <div class="quick-chip" onclick="p2pQuick(10)">10</div>
+        <div class="quick-chip" onclick="p2pQuick(50)">50</div>
+        <div class="quick-chip" onclick="p2pQuick(100)">100</div>
+        <div class="quick-chip" onclick="p2pQuick(-1)">Max</div>
+      </div>
+      <div class="kv"><span id="p2p-conv-lb">Montant en USD</span><b id="p2p-conv">—</b></div>
+      <div class="kv"><span>Règlement BORB réel</span><b id="p2p-borb">—</b></div>
+      <button class="btn btn-green" id="btn-p2p" onclick="p2pSend()"><svg class="ic"><use href="#i-send"/></svg> Envoyer</button>
+      <div class="err" id="p2p-err"></div>
+      <div class="okm" id="p2p-ok"></div>
+    </div>
+    <div class="card">
+      <div class="card-h"><span class="card-t">Recevoir</span></div>
+      <button class="btn btn-gold" onclick="ouvrirRecevoir()"><svg class="ic"><use href="#i-recv"/></svg> Mon adresse + QR</button>
+    </div>
+  </div>
+
   <!-- ===== BOTTOM NAV ===== -->
   <nav class="bnav" id="bnav" style="display:none;">
     <button class="on" id="nav-home" onclick="navGo('home')"><svg class="ic"><use href="#i-home"/></svg>Accueil</button>
@@ -690,6 +741,24 @@
     </div>
   </div>
 
+  <!-- ===== SHEET : MENU ===== -->
+  <div id="sheet-menu" class="sheet hidden">
+    <div class="inner">
+      <button class="close-x" onclick="fermerSheets()">✕</button>
+      <h2>Menu</h2>
+      <div class="menu-list">
+        <div class="menu-item" onclick="navP2P()"><span class="ic"><svg class="ic-svg"><use href="#i-send"/></svg></span><div><b>P2P simple</b><small>Envoi direct UQ ↔ UQ</small></div><span class="chev">›</span></div>
+        <div class="menu-item" onclick="ouvrirHorsLigne()"><span class="ic"><svg class="ic-svg"><use href="#i-key"/></svg></span><div><b>Wallet hors-ligne</b><small>Phrase 24 mots sans serveur</small></div><span class="chev">›</span></div>
+        <div class="menu-item" onclick="ouvrirVW()"><span class="ic"><svg class="ic-svg"><use href="#i-wallet"/></svg></span><div><b>Portefeuille virtuel</b><small>USD / CDF local</small></div><span class="chev">›</span></div>
+        <div class="menu-item" onclick="ouvrirSwap()"><span class="ic"><svg class="ic-svg"><use href="#i-swap"/></svg></span><div><b>Convertir</b><small>BORB ↔ USD ↔ CDF</small></div><span class="chev">›</span></div>
+        <div class="menu-item" onclick="ouvrirBinance()"><span class="ic"><svg class="ic-svg"><use href="#i-wallet"/></svg></span><div><b>Binance</b><small>Dépôt / soldes</small></div><span class="chev">›</span></div>
+        <div class="menu-item" onclick="ouvrirUqz()"><span class="ic"><svg class="ic-svg"><use href="#i-ext"/></svg></span><div><b>Ouvrir UQZ</b><small>L'application complète</small></div><span class="chev">›</span></div>
+        <div class="menu-item" onclick="verrouiller()"><span class="ic"><svg class="ic-svg"><use href="#i-lock"/></svg></span><div><b>Verrouiller</b><small>Verrouiller le wallet</small></div><span class="chev">›</span></div>
+      </div>
+      <button class="btn btn-gold" onclick="fermerSheets()">Fermer</button>
+    </div>
+  </div>
+
   <!-- ===== MASQUER ===== -->
   <div id="mask-screen" onclick="toggleMask()"><div class="m">🔒<br>Écran masqué — touchez pour réafficher</div></div>
 </div>
@@ -736,14 +805,14 @@ async function empreintePin(pin){let d=await sha256('borb-wallet'+pin);for(let i
 const $=id=>document.getElementById(id);
 function err(id,m){$(id).textContent=m||'';}
 function okm(id,m){$(id).textContent=m||'';$(id).style.color='var(--green)';}
-function fermerSheets(){['sheet-send','sheet-recv','sheet-scan','sheet-vw','sheet-swap','sheet-conv','sheet-offline','sheet-binance'].forEach(s=>$(s).classList.add('hidden'));}
+function fermerSheets(){['sheet-send','sheet-recv','sheet-scan','sheet-vw','sheet-swap','sheet-conv','sheet-offline','sheet-binance','sheet-menu'].forEach(s=>$(s).classList.add('hidden'));}
 function deconnecter(){SESSION=null;location.reload();}
 function toggleSolde(){const e=$('bal-borb');if(!e.dataset.v)e.dataset.v=e.innerHTML;e.innerHTML=e.innerHTML==='••••'?e.dataset.v:'••••';}
 function toggleSeed(){const p=$('seed-preview');p.classList.toggle('hidden');}
 
 // ---------- NAV ----------
 window.navGo=function(v){
-  ['home','trade','carnet','profile'].forEach(p=>{ $('page-'+p).classList.toggle('on',p===v); $('nav-'+p).classList.toggle('on',p===v); });
+  ['home','trade','carnet','profile','p2p'].forEach(p=>{ const pg=$('page-'+p);if(pg)pg.classList.toggle('on',p===v); const nb=$('nav-'+p);if(nb)nb.classList.toggle('on',p===v); });
   if(v==='trade') chargerTrade();
   if(v==='carnet') carnetTab('mes');
   if(v==='profile') remplirProfil();
@@ -1023,6 +1092,58 @@ window.envoyerBorb=async function(){
 function borbToFemto(s){s=s.trim();if(!/^\d+(\.\d{1,15})?$/.test(s))return null;const[i,d='']=s.split('.');const f=(d+'0'.repeat(15)).slice(0,15);return(BigInt(i)*10n**15n+BigInt(f)).toString();}
 if($('send-amount'))$('send-amount').addEventListener('input',sendCalc);
 
+// ---------- MENU ----------
+window.ouvrirMenu=function(){fermerSheets();$('sheet-menu').classList.remove('hidden');};
+window.navP2P=function(){fermerSheets();navGo('p2p');};
+
+// ---------- P2P SIMPLE ----------
+let P2P_DEV='BORB';
+window.p2pSetDev=function(d){
+  P2P_DEV=d;
+  document.querySelectorAll('#p2p-dev-chips .dev-chip').forEach(c=>c.classList.toggle('on',c.dataset.dev===d));
+  $('p2p-dev-lb').textContent=d==='BORB'?'BORB':d==='USD'?'USD ($)':'CDF';
+  $('p2p-amount').value='';p2pCalc();
+};
+window.p2pQuick=function(v){
+  const m=v===-1?borbVersDevise(SOLDE_BORB,P2P_DEV):v;
+  $('p2p-amount').value=String(Math.floor(m*100)/100);p2pCalc();
+};
+function p2pCalc(){
+  const brut=parseFloat(($('p2p-amount').value||'0').replace(',','.'))||0;
+  const borb=montantVersBorb(brut,P2P_DEV);
+  $('p2p-conv').textContent=P2P_DEV==='BORB'
+    ?'≈ '+(borb*TAUX_LIVE).toLocaleString('fr-FR',{maximumFractionDigits:2})+' $'
+    :fmtDev(brut,P2P_DEV)+' → '+borb.toLocaleString('fr-FR',{maximumFractionDigits:6})+' BORB';
+  $('p2p-borb').textContent=borb.toLocaleString('fr-FR',{maximumFractionDigits:8})+' BORB';
+}
+window.p2pSend=async function(){
+  err('p2p-err');okm('p2p-ok');
+  const to=$('p2p-to').value.trim(),raw=$('p2p-amount').value.trim();
+  if(!to||!raw)return err('p2p-err','Destinataire et montant requis');
+  if(to===SESSION.uq)return err('p2p-err','Envoi vers vous-même impossible');
+  $('btn-p2p').innerHTML='<span class="spin"></span>';
+  try{
+    const brut=parseFloat(raw.replace(',','.'));if(!(brut>0))throw new Error('Montant invalide');
+    const borb=montantVersBorb(brut,P2P_DEV);
+    const borbStr=borb.toFixed(8).replace(/0+$/,'').replace(/\.$/,'');
+    const femto=borbToFemto(borbStr);
+    if(!femto||BigInt(femto)<=0n)throw new Error('Montant invalide');
+    const prep=await api('POST','/tx/preparer',{from:SESSION.uq,to,montant_femto:femto.toString(),frais_femto:'0'});
+    if(!prep.tx)throw new Error(prep.message||'Préparation refusée');
+    const sig=nacl.sign.detached(enc.encode(prep.message),SESSION.kp.secretKey);
+    prep.tx.signature=hex(sig);
+    const r=await api('POST','/tx/import',prep.tx);
+    if(r.status!=='appliquee')throw new Error(r.message||'Transaction refusée');
+    if(P2P_DEV!=='BORB')vwJournal({type:'send',dev:P2P_DEV,montant:brut,borb,motif:'P2P → '+to,at:Date.now()});
+    okm('p2p-ok','✅ Envoyé ! '+fmtDev(brut,P2P_DEV)+' ≈ '+borb.toLocaleString('fr-FR',{maximumFractionDigits:4})+' BORB — tx '+prep.tx.borb_id.slice(0,16)+'…');
+    $('p2p-to').value='';$('p2p-amount').value='';p2pCalc();
+    await refreshSolde();
+  }catch(e){err('p2p-err',e.message||'Erreur');}
+  finally{$('btn-p2p').innerHTML='<svg class="ic"><use href="#i-send"/></svg> Envoyer';}
+};
+let SCAN_TARGET='send-to';
+window.ouvrirScanP2P=function(){SCAN_TARGET='p2p-to';ouvrirScan();};
+
 // ---------- RECEVOIR / QR ----------
 window.ouvrirRecevoir=function(){
   $('recv-uq').textContent=pseudoPour(SESSION.uq)+' ('+SESSION.uq+')';
@@ -1042,13 +1163,13 @@ window.ouvrirScan=async function(){
     const det=new BarcodeDetector({formats:['qr_code']});
     const tick=async()=>{
       if(!$('sheet-scan').classList.contains('hidden')&&v.readyState>=2){
-        try{const codes=await det.detect(v);if(codes.length){let t=(codes[0].rawValue||'').replace(/^UQ-BORB:/,'').trim();if(t){$('send-to').value=t;fermerScan();return;}}}catch(e){}
+        try{const codes=await det.detect(v);if(codes.length){let t=(codes[0].rawValue||'').replace(/^UQ-BORB:/,'').trim();if(t){$(SCAN_TARGET||'send-to').value=t;SCAN_TARGET='send-to';fermerScan();return;}}}catch(e){}
       }
       if(!$('sheet-scan').classList.contains('hidden'))requestAnimationFrame(tick);
     };tick();
   }catch(e){$('scan-err').textContent='Caméra refusée : '+e.message;}
 };
-window.fermerScan=function(){$('sheet-scan').classList.add('hidden');if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}};
+window.fermerScan=function(){$('sheet-scan').classList.add('hidden');SCAN_TARGET='send-to';if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}};
 
 // ---------- CONVERTIR ----------
 window.ouvrirConvertir=async function(){$('sheet-conv').classList.remove('hidden');try{const t=await api('GET','/taux/live');TAUX_LIVE=t.taux_usd||1;$('cv-taux').textContent=TAUX_LIVE.toFixed(4)+' USD/BORB';}catch(e){}convCalc();};
@@ -1197,7 +1318,7 @@ window.swExec=function(){
 let TRADE_COTE='achat',TRADE_DEV='',TRADE_PAYS='';
 window.navGo&&(window._navGo=navGo);
 window.navGo=function(v){
-  ['home','trade','carnet','profile'].forEach(p=>{ $('page-'+p).classList.toggle('on',p===v); $('nav-'+p).classList.toggle('on',p===v); });
+  ['home','trade','carnet','profile','p2p'].forEach(p=>{ const pg=$('page-'+p);if(pg)pg.classList.toggle('on',p===v); const nb=$('nav-'+p);if(nb)nb.classList.toggle('on',p===v); });
   if(v==='trade') chargerTrade();
   if(v==='carnet') carnetTab('mes');
   if(v==='profile') remplirProfil();
